@@ -12,7 +12,7 @@ const opt = z.string().trim().max(200).optional().transform((v) => v || null);
 const studentSchema = z.object({
   student_name: z.string().trim().min(2).max(120), phone_number: z.string().trim(),
   district_id: z.string().uuid(), block_id: z.string().uuid(),
-  school_name: opt, class_name: opt, interest_status: z.enum(interestValues),
+  school_name: opt, class_name: opt,
   notes: z.string().trim().max(2000).optional().transform((v) => v || null),
 });
 
@@ -23,7 +23,7 @@ export async function addStudent(formData: FormData) {
   const phone = normalizePhone(parsed.data.phone_number);
   if (!phone) return fail('/students/new', 'Enter a valid Indian mobile number.');
   const supabase = await createClient();
-  const { data, error } = await supabase.from('students').insert({ ...parsed.data, phone_number: phone, created_by: me.id }).select('id').single();
+  const { data, error } = await supabase.from('students').insert({ ...parsed.data, phone_number: phone, interest_status: 'unknown', created_by: me.id }).select('id').single();
   if (error) { console.error('addStudent', error.code); return fail('/students/new', error.code === '23503' ? 'Block does not belong to that district.' : 'Could not save the student.'); }
   redirect(`/students/${data.id}?saved=1`);
 }

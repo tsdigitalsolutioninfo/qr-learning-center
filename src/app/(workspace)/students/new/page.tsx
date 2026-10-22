@@ -2,7 +2,6 @@ import AppShell from '@/components/layout/AppShell';
 import DistrictBlockSelect from '@/components/students/DistrictBlockSelect';
 import { requireAdmin } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
-import { INTERESTS } from '@/lib/utils/labels';
 import { addStudent } from '../actions';
 
 export default async function NewStudent({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -21,8 +20,6 @@ export default async function NewStudent({ searchParams }: { searchParams: Promi
           <DistrictBlockSelect districts={districts} />
           <div><label className="label" htmlFor="school_name">School (optional)</label><input id="school_name" name="school_name" className="input" /></div>
           <div><label className="label" htmlFor="class_name">Class (optional)</label><input id="class_name" name="class_name" className="input" /></div>
-          <div><label className="label" htmlFor="interest_status">Initial interest</label><select id="interest_status" name="interest_status" className="input">
-            {INTERESTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
           <div><label className="label" htmlFor="notes">Notes (optional)</label><textarea id="notes" name="notes" rows={3} className="input" /></div>
           <button className="btn w-full">Save student</button>
         </form>)}

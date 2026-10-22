@@ -27,12 +27,12 @@ export default async function Blocks({ searchParams }: { searchParams: Promise<{
       {!blocks?.length ? <p className="text-sm text-neutral-600">No blocks yet.</p> : (
         <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
           {blocks.map((b) => (
-            <li key={b.id} className="flex items-center justify-between p-3">
-              <span>{b.name} <span className="text-sm text-neutral-500">
+            <li key={b.id} className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
+              <span className="min-w-0 break-words">{b.name} <span className="text-sm text-neutral-500">
                 ({(b.districts as unknown as { name: string } | null)?.name})</span> {!b.is_active && <span className="badge">Inactive</span>}</span>
               <form action={toggleBlock}>
                 <input type="hidden" name="id" value={b.id} /><input type="hidden" name="active" value={String(b.is_active)} />
-                <button className="btn-outline">{b.is_active ? 'Deactivate' : 'Activate'}</button>
+                <button className="btn-outline w-full sm:w-auto">{b.is_active ? 'Deactivate' : 'Activate'}</button>
               </form>
             </li>
           ))}

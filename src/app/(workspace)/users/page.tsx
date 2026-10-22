@@ -26,12 +26,12 @@ export default async function Users({ searchParams }: { searchParams: Promise<{ 
       {!users.length ? <p className="text-sm text-neutral-600">No staff accounts yet.</p> : (
         <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
           {users.map((u) => (
-            <li key={u.id} className="flex items-center justify-between gap-2 p-3">
-              <div><div className="font-medium">{u.full_name} {!u.is_active && <span className="badge">Inactive</span>}</div>
+            <li key={u.id} className="flex flex-col gap-3 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
+              <div className="min-w-0"><div className="break-words font-medium">{u.full_name} {!u.is_active && <span className="badge">Inactive</span>}</div>
                 <div className="text-sm text-neutral-600">{u.blocks?.name}, {u.blocks?.districts?.name}</div></div>
               <form action={toggleUser}>
                 <input type="hidden" name="id" value={u.id} /><input type="hidden" name="active" value={String(u.is_active)} />
-                <button className="btn-outline">{u.is_active ? 'Deactivate' : 'Activate'}</button>
+                <button className="btn-outline w-full sm:w-auto">{u.is_active ? 'Deactivate' : 'Activate'}</button>
               </form>
             </li>
           ))}

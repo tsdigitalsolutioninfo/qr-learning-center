@@ -64,12 +64,12 @@ export default async function Dashboard() {
   const rows = (recent ?? []) as Row[];
   return (
     <AppShell profile={profile} title={admin ? 'Dashboard' : 'My Dashboard'}>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-5">
         {stats.map(([l, v]) => {
           const Icon = statIcons[l] ?? RotateCcw;
           const urgent = l === 'Overdue follow-ups';
-          return <div key={l} className="card flex min-h-32 flex-col justify-between gap-4 transition-shadow hover:shadow-[0_12px_30px_-18px_rgba(23,25,87,.3)]">
-            <div className="flex items-start justify-between gap-3"><div className="text-3xl font-semibold tracking-tight text-[#171957]">{v}</div><span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${urgent ? 'bg-rose-50 text-rose-700' : 'bg-[#fbf5dc] text-[#776117]'}`}><Icon aria-hidden="true" size={19} strokeWidth={1.8} /></span></div>
+          return <div key={l} className="card flex min-h-28 flex-col justify-between gap-3 transition-shadow hover:shadow-[0_12px_30px_-18px_rgba(23,25,87,.3)] sm:min-h-32 sm:gap-4">
+            <div className="flex items-start justify-between gap-2"><div className="text-2xl font-semibold tracking-tight text-[#171957] sm:text-3xl">{v}</div><span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl sm:h-10 sm:w-10 ${urgent ? 'bg-rose-50 text-rose-700' : 'bg-[#fbf5dc] text-[#776117]'}`}><Icon aria-hidden="true" size={18} strokeWidth={1.8} /></span></div>
             <div className="text-sm font-medium leading-5 text-neutral-600">{l}</div>
           </div>;
         })}
@@ -80,9 +80,9 @@ export default async function Dashboard() {
           {!actions.length ? <p className="text-sm text-neutral-600">Nothing needs action right now.</p> : (
             <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
               {actions.map((a) => (
-                <li key={a.id} className="flex items-center justify-between gap-2 p-3">
-                  <div><Link href={`/students/${a.id}`} className="font-medium underline">{a.name}</Link><div className="text-sm text-neutral-600">{a.why}</div></div>
-                  <Link href={`/students/${a.id}/call`} className="btn">Call</Link>
+                <li key={a.id} className="flex flex-col gap-2 p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:p-4">
+                  <div className="min-w-0"><Link href={`/students/${a.id}`} className="break-words font-medium underline">{a.name}</Link><div className="text-sm text-neutral-600">{a.why}</div></div>
+                  <Link href={`/students/${a.id}/call`} className="btn w-full sm:w-auto">Call</Link>
                 </li>))}
             </ul>)}
         </section>)}

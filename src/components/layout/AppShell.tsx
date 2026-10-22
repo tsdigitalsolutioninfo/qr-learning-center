@@ -179,13 +179,13 @@ export default function AppShell({ profile, title, children }: { profile: Profil
           </div>
         </aside>
         <main className="mx-auto w-full max-w-7xl p-4 md:px-8 md:py-8">
-          <div className="mb-7 flex items-center justify-between gap-4 border-b border-[#e9e4cf] pb-5">
+          <div className="mb-5 flex flex-col items-start justify-between gap-3 border-b border-[#e9e4cf] pb-4 sm:mb-7 sm:flex-row sm:items-center sm:gap-4 sm:pb-5">
             <div className="min-w-0">
-              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8a711d]">QR Learning Center | Deogarh</p>
-              <h1 className="text-2xl font-semibold tracking-tight text-[#171957] md:text-[1.75rem]">{pageTitle}</h1>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8a711d] sm:text-[11px] sm:tracking-[0.18em]">QR Learning Center | Deogarh</p>
+              <h1 className="text-xl font-semibold tracking-tight text-[#171957] sm:text-2xl md:text-[1.75rem]">{pageTitle}</h1>
             </div>
             {pathname === '/students' && profile.role === 'admin' && (
-              <Link href="/students/new" className="btn shrink-0">Add student</Link>
+              <Link href="/students/new" className="btn w-full shrink-0 sm:w-auto">Add student</Link>
             )}
           </div>
           {children}

@@ -6,7 +6,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const { error } = await searchParams;
 
   return (
-    <main className="login-root fixed inset-0 z-0 m-0 h-dvh min-h-dvh w-full overflow-x-hidden overflow-y-auto bg-[#f8f7f1] lg:grid lg:grid-cols-[1.05fr_0.95fr]">
+    <main className="login-root fixed inset-0 top-0 z-0 m-0 h-dvh min-h-dvh w-full overflow-x-hidden overflow-y-auto bg-[#f8f7f1] lg:grid lg:grid-cols-[1.05fr_0.95fr]">
       <section className="relative hidden min-h-dvh flex-col justify-between overflow-hidden bg-[#10133f] px-12 py-10 text-white lg:flex xl:px-20">
         <div className="pointer-events-none absolute -right-40 -top-32 h-[34rem] w-[34rem] rounded-full border border-white/10" />
         <div className="pointer-events-none absolute -right-16 -top-4 h-[27rem] w-[27rem] rounded-full border border-white/10" />
@@ -53,13 +53,13 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             </div>
           </div>
 
-          <div className="rounded-3xl border border-[#e9e4cf] bg-white p-7 shadow-[0_24px_80px_-36px_rgba(23,25,87,0.2)] sm:p-10">
+          <div className="rounded-3xl border border-[#e9e4cf] bg-white p-5 shadow-[0_24px_80px_-36px_rgba(23,25,87,0.2)] sm:p-8 lg:p-10">
             <div className="mb-8">
               <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f7f0d1] text-[#171957]">
                 <LockKeyhole aria-hidden="true" size={21} />
               </div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#8a711d]">Welcome back</p>
-              <h2 className="text-3xl font-semibold tracking-tight text-[#171957]">Sign in to your workspace</h2>
+              <h2 className="text-2xl font-semibold tracking-tight text-[#171957] sm:text-3xl">Sign in to your workspace</h2>
               <p className="mt-2 text-sm leading-6 text-neutral-500">Use the account provided by your administrator to continue.</p>
             </div>
 

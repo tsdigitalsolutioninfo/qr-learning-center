@@ -55,17 +55,17 @@ export default async function Students({ searchParams }: { searchParams: Promise
         <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
           {rows.map((s) => (
             <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
-              <div className="min-w-0"><Link href={`/students/${s.id}`} className="font-medium underline">{s.student_name}</Link>
+              <div className="w-full min-w-0 flex-1 sm:w-auto"><Link href={`/students/${s.id}`} className="break-words font-medium underline">{s.student_name}</Link>
                 <div className="text-sm text-neutral-600">{s.phone_number} · {s.blocks?.name}{s.school_name ? ` · ${s.school_name}` : ''}{s.class_name ? ` (${s.class_name})` : ''}</div>
                 <div className="text-xs text-neutral-500"><span className="badge">{label(INTERESTS, s.interest_status)}</span>{' '}
                   Last call: {fmt(s.last_call_at)} · Next follow-up: {fmt(s.next_follow_up_at)}</div></div>
-              {admin && <div className="ml-auto flex shrink-0 flex-col items-end gap-1">
+              {admin && <div className="flex w-full shrink-0 flex-col items-start gap-1 sm:ml-auto sm:w-auto sm:items-end">
                 <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${callStatusStyle(s.last_call_status)}`}>
                   {s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}
                 </span>
                 <span className="text-xs text-neutral-500">{s.call_logs?.[0]?.count ?? 0} call attempts</span>
               </div>}
-              {!admin && <div className="flex flex-wrap items-center justify-end gap-2">
+              {!admin && <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
                 <span className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${callStatusStyle(s.last_call_status)}`}>
                   {s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}
                 </span>

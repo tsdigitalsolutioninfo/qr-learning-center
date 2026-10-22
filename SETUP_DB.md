@@ -12,13 +12,13 @@ Also check Dashboard > Settings > Data API that the tables are exposed.
 3. Recovery: repeat with a new auth user, or reset the password from the dashboard. Rotate the service key in Settings > API Keys.
 
 ## Security tests (use two accounts: admin A, correspondent C in block X)
-- C: `select` students -> only own assigned rows in block X.
+- C: `select` students -> only active rows in block X.
 - C: insert call_log with called_by = another user -> rejected.
-- C: insert call_log for unassigned student -> rejected.
+- C: insert call_log for a student in another block -> rejected.
 - C: update/delete call_logs -> permission denied.
 - C: update own profile role/is_active -> 0 rows (no policy).
-- C: update students.assigned_to -> 0 rows.
-- A: set students.assigned_to -> history row closed/opened, pending follow-ups move.
+- C: manage call logs and follow-ups only for students in block X.
+- A: student records are visible to the correspondent assigned to their block; no individual student assignment is performed.
 - Anonymous (no JWT): every table -> permission denied.
 
 ## Known limitations

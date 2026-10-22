@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import {
   Building2,
   ChevronLeft,
@@ -20,6 +20,23 @@ import {
 import { signOut } from '@/lib/auth/actions';
 import type { Profile } from '@/lib/auth/session';
 
+const ShellAlreadyRendered = createContext(false);
+
+function titleForPath(pathname: string, role: Profile['role']) {
+  if (pathname === '/dashboard') return role === 'admin' ? 'Dashboard' : 'My Dashboard';
+  if (pathname === '/students') return role === 'admin' ? 'Students' : 'Block Students';
+  if (pathname === '/students/new') return 'Add student';
+  if (/^\/students\/[^/]+\/call$/.test(pathname)) return 'Record call result';
+  if (/^\/students\/[^/]+$/.test(pathname)) return 'Student details';
+  if (pathname === '/calls') return role === 'admin' ? 'Calls' : 'Call History';
+  if (pathname === '/follow-ups') return 'Follow-ups';
+  if (pathname === '/districts') return 'Districts';
+  if (pathname === '/blocks') return 'Blocks';
+  if (pathname === '/users/create') return 'Create staff account';
+  if (pathname === '/users') return 'Correspondence staff';
+  return 'Workspace';
+}
+
 const ADMIN_NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/students', label: 'Students', icon: Users },
@@ -32,16 +49,20 @@ const ADMIN_NAV = [
 
 const CS_NAV = [
   { href: '/dashboard', label: 'My Dashboard', icon: LayoutDashboard },
-  { href: '/students', label: 'My Students', icon: Users },
+  { href: '/students', label: 'Block Students', icon: Users },
   { href: '/calls', label: 'Call History', icon: Phone },
   { href: '/follow-ups', label: 'Follow-ups', icon: ClipboardList },
 ];
 
-export default function AppShell({ profile, title, children }: { profile: Profile; title: string; children: React.ReactNode }) {
+export default function AppShell({ profile, title, children }: { profile: Profile; title?: string; children: React.ReactNode }) {
   const pathname = usePathname();
+  const alreadyRendered = useContext(ShellAlreadyRendered);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const nav = profile.role === 'admin' ? ADMIN_NAV : CS_NAV;
+  const pageTitle = title ?? titleForPath(pathname, profile.role);
+
+  if (alreadyRendered) return <>{children}</>;
 
   const links = nav.map(({ href, label, icon: Icon }) => {
     const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(`${href}/`));
@@ -63,6 +84,7 @@ export default function AppShell({ profile, title, children }: { profile: Profil
   });
 
   return (
+    <ShellAlreadyRendered.Provider value={true}>
     <div className="min-h-screen bg-[#f8f7f1] md:flex">
       <aside className={`relative hidden shrink-0 bg-[#10133f] text-white transition-[width] duration-200 md:flex md:min-h-screen md:flex-col ${collapsed ? 'md:w-[4.5rem]' : 'md:w-[17rem]'}`}>
         <div className={`flex h-16 items-center border-b border-white/10 ${collapsed ? 'justify-center px-2' : 'gap-3 px-4'}`}>
@@ -139,13 +161,19 @@ export default function AppShell({ profile, title, children }: { profile: Profil
           </div>
         </aside>
         <main className="mx-auto w-full max-w-7xl p-4 md:px-8 md:py-8">
-          <div className="mb-7 border-b border-[#e9e4cf] pb-5">
-            <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8a711d]">QR Learning Center | Deogarh</p>
-            <h1 className="text-2xl font-semibold tracking-tight text-[#171957] md:text-[1.75rem]">{title}</h1>
+          <div className="mb-7 flex items-center justify-between gap-4 border-b border-[#e9e4cf] pb-5">
+            <div className="min-w-0">
+              <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#8a711d]">QR Learning Center | Deogarh</p>
+              <h1 className="text-2xl font-semibold tracking-tight text-[#171957] md:text-[1.75rem]">{pageTitle}</h1>
+            </div>
+            {pathname === '/students' && profile.role === 'admin' && (
+              <Link href="/students/new" className="btn shrink-0">Add student</Link>
+            )}
           </div>
           {children}
         </main>
       </div>
     </div>
+    </ShellAlreadyRendered.Provider>
   );
 }

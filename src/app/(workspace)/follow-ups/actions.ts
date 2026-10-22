@@ -6,7 +6,7 @@ import { requireProfile } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { istInputToIso } from '@/lib/utils/ist';
 
-// RLS limits updates to the assignee (or an admin); .select() confirms a row was really changed.
+// RLS limits correspondent updates to follow-ups for active students in their block.
 async function change(formData: FormData, patch: Record<string, unknown>, view: string) {
   await requireProfile();
   const id = z.string().uuid().parse(formData.get('id'));

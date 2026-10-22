@@ -23,4 +23,7 @@ export async function middleware(request: NextRequest) {
   }
   return response;
 }
-export const config = { matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'] };
+// Public files in /public (such as the brand logo) must bypass auth redirects.
+export const config = {
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff|woff2|ttf|otf|pdf)$).*)'],
+};

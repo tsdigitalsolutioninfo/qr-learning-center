@@ -12,6 +12,8 @@ import {
   LayoutDashboard,
   Menu,
   LogOut,
+  Settings,
+  UserRound,
   Map,
   Phone,
   Users,
@@ -34,6 +36,7 @@ function titleForPath(pathname: string, role: Profile['role']) {
   if (pathname === '/blocks') return 'Blocks';
   if (pathname === '/users/create') return 'Create staff account';
   if (pathname === '/users') return 'Correspondence staff';
+  if (pathname === '/settings') return 'Settings';
   return 'Workspace';
 }
 
@@ -44,12 +47,12 @@ const ADMIN_NAV = [
   { href: '/follow-ups', label: 'Follow-ups', icon: ClipboardList },
   { href: '/districts', label: 'Districts', icon: Map },
   { href: '/blocks', label: 'Blocks', icon: Building2 },
-  { href: '/users', label: 'Users', icon: Users },
+  { href: '/users', label: 'Correspondence', icon: Users },
 ];
 
 const CS_NAV = [
   { href: '/dashboard', label: 'My Dashboard', icon: LayoutDashboard },
-  { href: '/students', label: 'Block Students', icon: Users },
+  { href: '/students', label: 'My Students', icon: Users },
   { href: '/calls', label: 'Call History', icon: Phone },
   { href: '/follow-ups', label: 'Follow-ups', icon: ClipboardList },
 ];
@@ -59,6 +62,7 @@ export default function AppShell({ profile, title, children }: { profile: Profil
   const alreadyRendered = useContext(ShellAlreadyRendered);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const nav = profile.role === 'admin' ? ADMIN_NAV : CS_NAV;
   const pageTitle = title ?? titleForPath(pathname, profile.role);
 
@@ -88,7 +92,7 @@ export default function AppShell({ profile, title, children }: { profile: Profil
     <div className="min-h-screen bg-[#f8f7f1] md:flex">
       <aside className={`relative hidden shrink-0 bg-[#10133f] text-white transition-[width] duration-200 md:flex md:min-h-screen md:flex-col ${collapsed ? 'md:w-[4.5rem]' : 'md:w-[17rem]'}`}>
         <div className={`flex h-16 items-center border-b border-white/10 ${collapsed ? 'justify-center px-2' : 'gap-3 px-4'}`}>
-          <Image src="/brand-logo.png" alt="QR Learning Center Deogarh" width={40} height={40} priority className="h-10 w-10 shrink-0 object-contain" />
+          <Image src="/brand-logo.png" alt="QR Learning Center Deogarh" width={40} height={40} priority className={`h-10 w-10 shrink-0 object-contain ${collapsed ? 'hidden' : ''}`} />
           <span className={`min-w-0 text-[13px] font-semibold leading-tight tracking-tight ${collapsed ? 'sr-only' : ''}`}>QR Learning Center<span className="block text-[11px] font-medium text-white/60">Deogarh</span></span>
           <button
             type="button"
@@ -96,7 +100,7 @@ export default function AppShell({ profile, title, children }: { profile: Profil
             aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-expanded={!collapsed}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-white/20 bg-white/10 text-white shadow-sm transition-colors hover:bg-white/20 ${collapsed ? 'absolute left-[3.25rem] top-3 z-10' : 'ml-auto'}`}
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white shadow-sm transition-colors hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-[#d3b13b] focus:ring-offset-2 focus:ring-offset-[#10133f] ${collapsed ? 'mx-auto' : 'ml-auto'}`}
           >
             {collapsed ? <ChevronRight aria-hidden="true" size={18} /> : <ChevronLeft aria-hidden="true" size={18} />}
           </button>
@@ -118,17 +122,31 @@ export default function AppShell({ profile, title, children }: { profile: Profil
             aria-controls="mobile-sidebar" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[#171957] hover:bg-[#f2edda] md:hidden">
             {mobileOpen ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
           </button>
-          <div className="min-w-0 text-sm">
-            <span className="block truncate font-semibold text-[#17172b]">{profile.full_name}</span>
-            <span className="hidden text-xs text-neutral-500 sm:block">{profile.role === 'admin' ? 'Administrator workspace' : 'Block correspondence workspace'}</span>
+          {collapsed && <div className="hidden items-center gap-2 md:flex">
+            <Image src="/brand-logo.png" alt="" width={36} height={36} priority className="h-9 w-9 shrink-0 object-contain" />
+            <span className="text-[13px] font-semibold leading-tight tracking-tight text-[#171957]">QR Learning Center<span className="block text-[11px] font-medium text-neutral-500">Deogarh</span></span>
+          </div>}
           </div>
-          </div>
-          <form action={signOut}>
-            <button className="btn-outline min-h-10 gap-2 px-3" aria-label="Sign out">
-              <LogOut aria-hidden="true" size={16} />
-              <span className="hidden sm:inline">Sign out</span>
+          <div className="relative flex shrink-0 items-center gap-3">
+            <div className="hidden min-w-0 text-right sm:block">
+              <p className="max-w-56 truncate text-sm font-semibold text-[#17172b]">{profile.full_name}</p>
+              <p className="text-xs text-neutral-500">{profile.role === 'admin' ? 'Administrator workspace' : 'Block correspondence workspace'}</p>
+            </div>
+            <button type="button" onClick={() => setProfileMenuOpen((open) => !open)} aria-label="Open profile menu" aria-haspopup="menu" aria-expanded={profileMenuOpen}
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e9e4cf] bg-[#fbf5dc] text-[#171957] transition hover:bg-[#f5edc8] focus:outline-none focus:ring-4 focus:ring-[#171957]/10">
+              <UserRound aria-hidden="true" size={19} />
             </button>
-          </form>
+            {profileMenuOpen && <>
+              <button type="button" aria-label="Close profile menu" className="fixed inset-0 z-30 cursor-default" onClick={() => setProfileMenuOpen(false)} />
+              <div role="menu" aria-label="Profile options" className="absolute right-0 top-full z-40 mt-3 w-64 overflow-hidden rounded-2xl border border-[#e9e4cf] bg-white p-1.5 shadow-[0_18px_45px_-20px_rgba(23,25,87,.35)]">
+                <div className="border-b border-[#eeeadd] px-3 py-3 sm:hidden"><p className="truncate text-sm font-semibold text-[#17172b]">{profile.full_name}</p><p className="mt-0.5 text-xs text-neutral-500">{profile.role === 'admin' ? 'Administrator workspace' : 'Block correspondence workspace'}</p></div>
+                <Link role="menuitem" href="/settings" onClick={() => setProfileMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-[#26274e] hover:bg-[#fbfaf6]"><Settings aria-hidden="true" size={17} className="text-neutral-500" /> Settings</Link>
+                <form action={signOut}>
+                  <button role="menuitem" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-rose-700 hover:bg-rose-50"><LogOut aria-hidden="true" size={17} /> Log out</button>
+                </form>
+              </div>
+            </>}
+          </div>
         </header>
         {mobileOpen && <button type="button" aria-label="Close navigation" onClick={() => setMobileOpen(false)} className="fixed inset-0 z-30 bg-black/30 md:hidden" />}
         <aside id="mobile-sidebar" className={`fixed inset-y-0 left-0 z-40 flex w-72 max-w-[calc(100vw_-_2rem)] flex-col bg-[#10133f] text-white shadow-2xl transition-transform duration-200 md:hidden ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`} aria-label="Mobile sidebar" aria-hidden={!mobileOpen}>

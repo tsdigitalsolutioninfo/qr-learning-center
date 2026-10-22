@@ -4,11 +4,23 @@ import { requireProfile } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { fmt } from '@/lib/utils/ist';
 import { telHref } from '@/lib/utils/phone';
-import { INTERESTS, label } from '@/lib/utils/labels';
+import { CALL_STATUSES, INTERESTS, label } from '@/lib/utils/labels';
 import type { Row } from '@/lib/types';
 
 const PAGE = 25;
 const UUID = /^[0-9a-f-]{36}$/i;
+const callStatusStyle = (status: string | null) => {
+  switch (status) {
+    case 'connected': return 'border-emerald-200 bg-emerald-50 text-emerald-700';
+    case 'not_connected':
+    case 'busy':
+    case 'switched_off': return 'border-amber-200 bg-amber-50 text-amber-700';
+    case 'invalid_number':
+    case 'disconnected': return 'border-red-200 bg-red-50 text-red-700';
+    case 'call_back_requested': return 'border-blue-200 bg-blue-50 text-blue-700';
+    default: return 'border-neutral-200 bg-neutral-100 text-neutral-600';
+  }
+};
 
 export default async function Students({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const profile = await requireProfile();
@@ -17,7 +29,7 @@ export default async function Students({ searchParams }: { searchParams: Promise
   const page = Math.max(1, Number(sp.page) || 1);
   const supabase = await createClient();
   let q = supabase.from('students')
-    .select('id, student_name, phone_number, interest_status, last_call_at, next_follow_up_at, school_name, class_name, blocks(name)', { count: 'exact' })
+    .select('id, student_name, phone_number, interest_status, last_call_at, last_call_status, next_follow_up_at, school_name, class_name, blocks(name), call_logs(count)', { count: 'exact' })
     .is('archived_at', null).order('student_name').range((page - 1) * PAGE, page * PAGE - 1);
   const term = (sp.q ?? '').replace(/[,()%*\\]/g, ' ').trim();
   if (term) q = q.or(`student_name.ilike.%${term}%,phone_number.ilike.%${term}%,school_name.ilike.%${term}%`);
@@ -47,8 +59,18 @@ export default async function Students({ searchParams }: { searchParams: Promise
                 <div className="text-sm text-neutral-600">{s.phone_number} · {s.blocks?.name}{s.school_name ? ` · ${s.school_name}` : ''}{s.class_name ? ` (${s.class_name})` : ''}</div>
                 <div className="text-xs text-neutral-500"><span className="badge">{label(INTERESTS, s.interest_status)}</span>{' '}
                   Last call: {fmt(s.last_call_at)} · Next follow-up: {fmt(s.next_follow_up_at)}</div></div>
-              <div className="flex gap-2"><a href={telHref(s.phone_number)} className="btn">Call</a>
-                {!admin && <Link href={`/students/${s.id}/call`} className="btn-outline">Record</Link>}</div>
+              {admin && <div className="ml-auto flex shrink-0 flex-col items-end gap-1">
+                <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${callStatusStyle(s.last_call_status)}`}>
+                  {s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}
+                </span>
+                <span className="text-xs text-neutral-500">{s.call_logs?.[0]?.count ?? 0} call attempts</span>
+              </div>}
+              {!admin && <div className="flex flex-wrap items-center justify-end gap-2">
+                <span className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${callStatusStyle(s.last_call_status)}`}>
+                  {s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}
+                </span>
+                <a href={telHref(s.phone_number)} className="btn">Call</a>
+                <Link href={`/students/${s.id}/call`} className="btn-outline">Call status</Link></div>}
             </li>))}
         </ul>)}
       <div className="mt-4 flex items-center justify-between text-sm">

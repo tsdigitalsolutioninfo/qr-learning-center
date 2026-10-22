@@ -122,18 +122,15 @@ export async function bulkUploadStudents(_previousState: BulkUploadState, formDa
     .from('districts').select('id, name').eq('is_active', true);
   const { data: blocks, error: blocksError } = await supabase
     .from('blocks').select('id, name, district_id').eq('is_active', true);
-  const { data: correspondents, error: correspondentsError } = await supabase
-    .from('profiles').select('block_id').eq('role', 'block_correspondence').eq('is_active', true);
-  if (districtsError || blocksError || correspondentsError) {
-    console.error('bulkUploadStudents: block/correspondent lookup failed', districtsError?.code, blocksError?.code, correspondentsError?.code);
-    return importFailure('Could not verify districts, blocks, and correspondents. Please try again.');
+  if (districtsError || blocksError) {
+    console.error('bulkUploadStudents: location lookup failed', districtsError?.code, blocksError?.code);
+    return importFailure('Could not verify district and block names. Please try again.');
   }
   const districtIdsByName = new Map((districts ?? []).map((district) => [locationKey(district.name), district.id]));
   const blockIdsByDistrictAndName = new Map((blocks ?? []).map((block) => [
     `${block.district_id}:${locationKey(block.name)}`,
     block.id,
   ]));
-  const blocksWithCorrespondents = new Set((correspondents ?? []).map((correspondent) => correspondent.block_id));
 
   const optionalHeaders = ['school', 'class', 'notes'];
   const usedColumns = [...requiredHeaders, ...optionalHeaders]
@@ -181,10 +178,6 @@ export async function bulkUploadStudents(_previousState: BulkUploadState, formDa
     const blockId = blockIdsByDistrictAndName.get(`${districtId}:${locationKey(parsed.data.block)}`);
     if (!blockId) {
       issues.push(`Row ${rowNumber}: Block "${parsed.data.block}" is not active in district "${parsed.data.district}".`);
-      continue;
-    }
-    if (!blocksWithCorrespondents.has(blockId)) {
-      issues.push(`Row ${rowNumber}: No active correspondent is assigned to block "${parsed.data.block}".`);
       continue;
     }
     rowsToInsert.push({

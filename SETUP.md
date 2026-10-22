@@ -15,6 +15,6 @@ Not in this build (Part 2): reports, charts, settings, user detail page.
 ## Part 2 additions
 - Apply the second migration too (`supabase db push`): archival, last-call summary, idempotent call logging, follow-up sync, indexes.
 - Day boundaries use Asia/Kolkata. Overdue = pending and due before today; Due today = pending due within today.
-- Student imports: admins can download an `.xlsx` template from Add student. Required columns are Student Name, Phone Number, District, and Block; School, Class, and Notes are optional. District and block names must match active records, and every selected block must have an active correspondent. Imports accept up to 500 rows and 5 MB; invalid rows or phone numbers already in the student list cancel the entire import. Imported students are visible to correspondents associated with their block.
+- Student imports: admins can download an `.xlsx` template from Add student. Required columns are Student Name, Phone Number, District, and Block; School, Class, and Notes are optional. District and block names must match active records. Imports do not require an active correspondent for a block, and accept up to 500 rows and 5 MB; invalid rows or phone numbers already in the student list cancel the entire import. Imported students are visible to correspondents associated with their block once a correspondent is active.
 - Not yet built: reports + charts + CSV export, edit-student form, settings page.
 - Run `npm run typecheck && npm run lint` first: nothing here has been compiled or run against a live Supabase project.

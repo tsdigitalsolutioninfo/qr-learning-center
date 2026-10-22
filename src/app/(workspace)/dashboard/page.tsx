@@ -16,17 +16,17 @@ export default async function Dashboard() {
   const st = () => supabase.from('students').select('*', { count: 'exact', head: true }).is('archived_at', null);
   const cl = () => supabase.from('call_logs').select('*', { count: 'exact', head: true }).gte('created_at', start).lt('created_at', end);
   const fu = () => supabase.from('follow_ups').select('*', { count: 'exact', head: true }).eq('status', 'pending');
-  // RLS scopes every count: admins see everything, correspondents only their own records.
-  const [total, assigned, uncontacted, interested, notInt, calls, connected, notConn, dueToday, overdue] = await Promise.all([
-    n(st()), n(st().not('assigned_to', 'is', null)), n(st().is('last_call_at', null)),
+  // RLS scopes every count: admins see everything, correspondents only their block.
+  const [total, uncontacted, interested, notInt, calls, connected, notConn, dueToday, overdue] = await Promise.all([
+    n(st()), n(st().is('last_call_at', null)),
     n(st().eq('interest_status', 'interested')), n(st().eq('interest_status', 'not_interested')),
     n(cl()), n(cl().eq('call_status', 'connected')), n(cl().neq('call_status', 'connected')),
     n(fu().gte('due_at', start).lt('due_at', end)), n(fu().lt('due_at', start)),
   ]);
   const stats: [string, number][] = admin
-    ? [['Total students', total], ['Assigned', assigned], ['Unassigned', total - assigned], ['Calls today', calls], ['Connected today', connected],
+    ? [['Total students', total], ['Not yet contacted', uncontacted], ['Calls today', calls], ['Connected today', connected],
        ['Not connected today', notConn], ['Interested', interested], ['Not interested', notInt], ['Follow-ups due today', dueToday], ['Overdue follow-ups', overdue]]
-    : [['My students', total], ['Not yet contacted', uncontacted], ['Calls today', calls], ['Connected today', connected], ['Not connected today', notConn],
+    : [['Students in my block', total], ['Not yet contacted', uncontacted], ['Calls today', calls], ['Connected today', connected], ['Not connected today', notConn],
        ['Interested', interested], ['Follow-ups due today', dueToday], ['Overdue follow-ups', overdue]];
 
   const { data: recent } = await supabase.from('call_logs')

@@ -28,17 +28,6 @@ export async function addStudent(formData: FormData) {
   redirect(`/students/${data.id}?saved=1`);
 }
 
-export async function assignStudent(formData: FormData) {
-  await requireAdmin();
-  const id = z.string().uuid().parse(formData.get('id'));
-  const to = z.string().uuid().or(z.literal('')).parse(formData.get('assigned_to'));
-  const supabase = await createClient();
-  // DB trigger validates role/active/block, writes assignment history and moves pending follow-ups.
-  const { error } = await supabase.from('students').update({ assigned_to: to || null }).eq('id', id);
-  if (error) { console.error('assign', error.code); return fail(`/students/${id}`, 'Assignment rejected: the user must be an active correspondent of the same block.'); }
-  revalidatePath(`/students/${id}`); redirect(`/students/${id}?saved=1`);
-}
-
 export async function archiveStudent(formData: FormData) {
   await requireAdmin();
   const id = z.string().uuid().parse(formData.get('id'));
@@ -72,7 +61,7 @@ export async function recordCall(formData: FormData) {
   // 23505 = same request_id already saved (double submit): treat as success without duplicating.
   if (error && error.code !== '23505') {
     console.error('recordCall', error.code);
-    return fail(back, error.code === '42501' ? 'This student is not assigned to you.' : 'Could not save the call. Nothing was recorded.');
+    return fail(back, error.code === '42501' ? 'This student is not in your block.' : 'Could not save the call. Nothing was recorded.');
   }
   revalidatePath('/dashboard');
   redirect(`/students/${d.student_id}?saved=1`);

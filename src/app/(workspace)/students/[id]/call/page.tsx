@@ -10,12 +10,12 @@ export default async function RecordCall({ params, searchParams }: { params: Pro
   const profile = await requireProfile();
   const { id } = await params; const { error } = await searchParams;
   const supabase = await createClient();
-  const { data: s } = await supabase.from('students').select('id, student_name, phone_number, interest_status, assigned_to').eq('id', id).maybeSingle();
+  const { data: s } = await supabase.from('students').select('id, student_name, phone_number, interest_status').eq('id', id).maybeSingle();
   if (!s) notFound();
   return (
     <AppShell profile={profile} title="Record call result">
       {error && <p role="alert" className="mb-3 text-sm text-red-700">{error}</p>}
-      {profile.role === 'admin' ? <p className="text-sm">Only the assigned correspondent can record calls.</p> : (
+      {profile.role === 'admin' ? <p className="text-sm">Only a correspondent assigned to this block can record calls.</p> : (
         <form action={recordCall} className="max-w-md space-y-3">
           <input type="hidden" name="student_id" value={s.id} /><input type="hidden" name="request_id" value={crypto.randomUUID()} />
           <div className="card"><div className="font-medium">{s.student_name}</div><div className="text-sm">{s.phone_number}</div>

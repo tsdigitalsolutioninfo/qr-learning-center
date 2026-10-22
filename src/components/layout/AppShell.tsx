@@ -24,7 +24,7 @@ const ShellAlreadyRendered = createContext(false);
 
 function titleForPath(pathname: string, role: Profile['role']) {
   if (pathname === '/dashboard') return role === 'admin' ? 'Dashboard' : 'My Dashboard';
-  if (pathname === '/students') return role === 'admin' ? 'Students' : 'My Students';
+  if (pathname === '/students') return role === 'admin' ? 'Students' : 'Block Students';
   if (pathname === '/students/new') return 'Add student';
   if (/^\/students\/[^/]+\/call$/.test(pathname)) return 'Record call result';
   if (/^\/students\/[^/]+$/.test(pathname)) return 'Student details';
@@ -49,7 +49,7 @@ const ADMIN_NAV = [
 
 const CS_NAV = [
   { href: '/dashboard', label: 'My Dashboard', icon: LayoutDashboard },
-  { href: '/students', label: 'My Students', icon: Users },
+  { href: '/students', label: 'Block Students', icon: Users },
   { href: '/calls', label: 'Call History', icon: Phone },
   { href: '/follow-ups', label: 'Follow-ups', icon: ClipboardList },
 ];

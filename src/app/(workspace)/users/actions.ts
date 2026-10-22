@@ -52,6 +52,6 @@ export async function toggleUser(formData: FormData) {
   const id = z.string().uuid().parse(formData.get('id'));
   if (id === me.id) return; // admins cannot deactivate themselves
   const supabase = await createClient();
-  await supabase.from('profiles').update({ is_active: formData.get('active') !== 'true' }).eq('id', id).eq('role', 'block_correspondence');
+  await supabase.from('profiles').update({ is_active: formData.get('active') !== 'true' }).eq('id', id).eq('role', 'block_correspondence').throwOnError();
   revalidatePath('/users');
 }

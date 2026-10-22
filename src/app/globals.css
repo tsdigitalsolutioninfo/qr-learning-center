@@ -15,7 +15,7 @@
 html, body { min-height: 100%; width: 100%; margin: 0 !important; padding: 0 !important; border: 0; }
 html { background: var(--canvas); }
 body { background: var(--canvas); color: #17172b; }
-body > main.login-root { position: fixed !important; inset: 0 !important; top: -30px !important; left: 0 !important; height: calc(100dvh + 30px) !important; margin: 0 !important; padding-top: 0 !important; border: 0 !important; outline: 0 !important; }
+.login-root { position: fixed !important; inset: 0 !important; top: -30px !important; left: 0 !important; height: calc(100dvh + 30px) !important; margin: 0 !important; padding-top: 0 !important; border: 0 !important; outline: 0 !important; }
 ::selection { background: #f3e6a9; color: var(--brand-navy-deep); }
 
 @layer components {
@@ -44,6 +44,12 @@ main a:not(.btn):not(.btn-outline):hover { color: var(--brand-navy); }
 input[type="date"], input[type="datetime-local"], select, textarea { color-scheme: light; }
 
 @media (max-width: 640px) {
-  main table { min-width: 42rem; }
-  .card { padding: 1rem; }
+  main { padding: .875rem !important; }
+  main table { min-width: 40rem; }
+  main > form { padding: .75rem; }
+  main > section { margin-top: 1.25rem; }
+  .btn, .btn-outline { min-height: 40px; gap: .4rem; border-radius: .7rem; padding-left: .75rem; padding-right: .75rem; font-size: .8125rem; }
+  .input { min-height: 42px; border-radius: .7rem; padding-left: .7rem; padding-right: .7rem; font-size: .875rem; }
+  .card { border-radius: 1rem; padding: .875rem; }
+  .badge { padding: .2rem .55rem; font-size: .6875rem; }
 }

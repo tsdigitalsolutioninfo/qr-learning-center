@@ -5,7 +5,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ e
   const { error } = await searchParams;
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-12">
-      <section className="w-full max-w-md rounded-3xl border border-[#e9e4cf] bg-white p-7 shadow-[0_24px_80px_-36px_rgba(23,25,87,0.2)] sm:p-10">
+      <section className="w-full max-w-md rounded-3xl border border-[#e9e4cf] bg-white p-5 shadow-[0_24px_80px_-36px_rgba(23,25,87,0.2)] sm:p-10">
         <div className="mb-8 flex items-center gap-3">
           <Image src="/brand-logo.png" alt="QR Learning Center Deogarh logo" width={56} height={56} className="h-14 w-14 object-contain" />
           <div><p className="text-sm font-bold tracking-wide text-[#171957]">QR LEARNING CENTER</p><p className="text-xs tracking-wider text-neutral-500">DEOGARH</p></div>

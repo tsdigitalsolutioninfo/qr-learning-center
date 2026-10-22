@@ -31,3 +31,19 @@ export async function setPassword(formData: FormData) {
   await createAdminClient().auth.admin.updateUserById(user.id, { app_metadata: { must_change_password: false } });
   redirect('/dashboard');
 }
+
+export async function changePassword(formData: FormData) {
+  const currentPassword = String(formData.get('current_password') ?? '');
+  const newPassword = String(formData.get('new_password') ?? '');
+  const confirmPassword = String(formData.get('confirm_password') ?? '');
+  if (!currentPassword || newPassword.length < 8) redirect('/settings?error=' + encodeURIComponent('Enter your current password and a new password with at least 8 characters.'));
+  if (newPassword !== confirmPassword) redirect('/settings?error=' + encodeURIComponent('The new passwords do not match.'));
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user?.email) redirect('/login');
+  const { error: verifyError } = await supabase.auth.signInWithPassword({ email: user.email, password: currentPassword });
+  if (verifyError) redirect('/settings?error=' + encodeURIComponent('Your current password is incorrect.'));
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) redirect('/settings?error=' + encodeURIComponent(error.message));
+  redirect('/settings?saved=1');
+}

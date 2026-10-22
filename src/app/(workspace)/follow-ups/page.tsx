@@ -27,7 +27,7 @@ export default async function FollowUps({ searchParams }: { searchParams: Promis
     <AppShell profile={profile} title="Follow-ups">
       {sp.error && <p role="alert" className="mb-3 text-sm text-red-700">{sp.error}</p>}
       {sp.saved && <p className="mb-3 rounded border border-green-200 bg-green-50 p-2 text-sm text-green-800">Updated.</p>}
-      <nav className="mb-4 flex gap-2 overflow-x-auto">{VIEWS.map(([k, l]) => <Link key={k} href={`/follow-ups?view=${k}`} className={k === view ? 'btn' : 'btn-outline'}>{l}</Link>)}</nav>
+      <nav className="-mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1" aria-label="Follow-up views">{VIEWS.map(([k, l]) => <Link key={k} href={`/follow-ups?view=${k}`} className={`${k === view ? 'btn' : 'btn-outline'} shrink-0`}>{l}</Link>)}</nav>
       {!data?.length ? <p className="text-sm text-neutral-600">Nothing here.</p> : (
         <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
           {(data as Row[]).map((f) => (
@@ -38,9 +38,9 @@ export default async function FollowUps({ searchParams }: { searchParams: Promis
                 <div className="flex flex-wrap items-center gap-2">
                   <a href={telHref(f.students?.phone_number)} className="btn">Call</a>
                   <form action={completeFollowUp}><input type="hidden" name="id" value={f.id} /><button className="btn-outline">Mark completed</button></form>
-                  <form action={rescheduleFollowUp} className="flex gap-1"><input type="hidden" name="id" value={f.id} />
-                    <input type="datetime-local" name="due_at" required className="input w-auto" aria-label="New date and time (IST)" /><button className="btn-outline">Reschedule</button></form>
-                  <form action={cancelFollowUp}><input type="hidden" name="id" value={f.id} /><ConfirmButton message="Cancel this follow-up?">Cancel</ConfirmButton></form>
+                  <form action={rescheduleFollowUp} className="flex w-full gap-1 sm:w-auto"><input type="hidden" name="id" value={f.id} />
+                    <input type="datetime-local" name="due_at" required className="input min-w-0 flex-1 sm:w-auto sm:flex-none" aria-label="New date and time (IST)" /><button className="btn-outline shrink-0">Reschedule</button></form>
+                  <form action={cancelFollowUp} className="w-full sm:w-auto"><input type="hidden" name="id" value={f.id} /><ConfirmButton message="Cancel this follow-up?">Cancel</ConfirmButton></form>
                 </div>)}
             </li>))}
         </ul>)}

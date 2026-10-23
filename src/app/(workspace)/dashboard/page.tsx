@@ -64,6 +64,7 @@ export default async function Dashboard() {
   const rows = (recent ?? []) as Row[];
   return (
     <AppShell profile={profile} title={admin ? 'Dashboard' : 'My Dashboard'}>
+      <div className="pb-8 sm:pb-0">
       <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 xl:grid-cols-5">
         {stats.map(([l, v]) => {
           const Icon = statIcons[l] ?? RotateCcw;
@@ -74,7 +75,6 @@ export default async function Dashboard() {
           </div>;
         })}
       </div>
-      <p className="mt-2 text-xs text-neutral-500">Days use Asia/Kolkata. Overdue = pending and due before today. Call counts are attempts, not unique students.</p>
       {!admin && (
         <section className="mt-6"><h2 className="mb-2 font-medium">Needs action</h2>
           {!actions.length ? <p className="text-sm text-neutral-600">Nothing needs action right now.</p> : (
@@ -95,6 +95,7 @@ export default async function Dashboard() {
               <td>{label(INTERESTS, r.interest_status)}</td><td>{fmt(r.created_at)}</td></tr>))}
           </tbody></table></div>)}
       </section>
+      </div>
     </AppShell>
   );
 }

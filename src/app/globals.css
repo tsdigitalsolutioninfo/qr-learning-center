@@ -43,12 +43,37 @@ main a:not(.btn):not(.btn-outline) { text-underline-offset: 3px; }
 main a:not(.btn):not(.btn-outline):hover { color: var(--brand-navy); }
 input[type="date"], input[type="datetime-local"], select, textarea { color-scheme: light; }
 
+.loading-dots {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: .12rem;
+  margin-inline-start: .4em;
+  vertical-align: middle;
+}
+.loading-dots > span {
+  width: .25rem;
+  height: .25rem;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: loading-dot-bounce 700ms ease-in-out infinite;
+}
+.loading-dots > span:nth-child(2) { animation-delay: 120ms; }
+.loading-dots > span:nth-child(3) { animation-delay: 240ms; }
+@keyframes loading-dot-bounce {
+  0%, 60%, 100% { opacity: .45; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-dots > span { animation: none; opacity: .75; }
+}
+
 @media (max-width: 640px) {
   main { padding: .875rem !important; }
   main table { min-width: 40rem; }
   main > form { padding: .75rem; }
   main > section { margin-top: 1.25rem; }
-  .btn, .btn-outline { min-height: 40px; gap: .4rem; border-radius: .7rem; padding-left: .75rem; padding-right: .75rem; font-size: .8125rem; }
+  .btn, .btn-outline { min-height: 40px; gap: .4rem; margin-block: .25rem; border-radius: .7rem; padding-left: .75rem; padding-right: .75rem; font-size: .8125rem; }
   .input { min-height: 42px; border-radius: .7rem; padding-left: .7rem; padding-right: .7rem; font-size: .875rem; }
   .card { border-radius: 1rem; padding: .875rem; }
   .badge { padding: .2rem .55rem; font-size: .6875rem; }

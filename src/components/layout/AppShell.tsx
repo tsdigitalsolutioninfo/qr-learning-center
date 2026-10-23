@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
+import AddDistrictModal from '@/components/districts/AddDistrictModal';
+import AddBlockModal from '@/components/blocks/AddBlockModal';
 import {
   Building2,
   ChevronLeft,
@@ -14,7 +16,7 @@ import {
   LogOut,
   Settings,
   UserRound,
-  Map,
+  Map as MapIcon,
   Phone,
   Users,
   X,
@@ -45,7 +47,7 @@ const ADMIN_NAV = [
   { href: '/students', label: 'Students', icon: Users },
   { href: '/calls', label: 'Calls', icon: Phone },
   { href: '/follow-ups', label: 'Follow-ups', icon: ClipboardList },
-  { href: '/districts', label: 'Districts', icon: Map },
+  { href: '/districts', label: 'Districts', icon: MapIcon },
   { href: '/blocks', label: 'Blocks', icon: Building2 },
   { href: '/users', label: 'Correspondence', icon: Users },
 ];
@@ -65,6 +67,77 @@ export default function AppShell({ profile, title, children }: { profile: Profil
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const nav = profile.role === 'admin' ? ADMIN_NAV : CS_NAV;
   const pageTitle = title ?? titleForPath(pathname, profile.role);
+
+  useEffect(() => {
+    if (alreadyRendered) return;
+    const timers = new Map<HTMLElement, ReturnType<typeof setTimeout>>();
+    const indicators = new Map<HTMLElement, HTMLSpanElement>();
+    const observers = new Map<HTMLElement, MutationObserver>();
+    const clearPending = (element: HTMLElement) => {
+      element.removeAttribute('data-pending');
+      element.removeAttribute('aria-busy');
+      indicators.get(element)?.remove();
+      indicators.delete(element);
+      observers.get(element)?.disconnect();
+      observers.delete(element);
+      const timer = timers.get(element);
+      if (timer) clearTimeout(timer);
+      timers.delete(element);
+    };
+    const markPending = (element: HTMLElement) => {
+      element.setAttribute('data-pending', 'true');
+      element.setAttribute('aria-busy', 'true');
+      if (!indicators.has(element)) {
+        const dots = document.createElement('span');
+        dots.className = 'loading-dots';
+        dots.setAttribute('aria-hidden', 'true');
+        for (let index = 0; index < 3; index += 1) dots.append(document.createElement('span'));
+        element.append(dots);
+        indicators.set(element, dots);
+      }
+      const prior = timers.get(element);
+      if (prior) clearTimeout(prior);
+      timers.set(element, setTimeout(() => clearPending(element), 15000));
+    };
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const submitButton = target.closest<HTMLButtonElement>('button[type="submit"], button:not([type])');
+      if (submitButton?.form) {
+        markPending(submitButton);
+        window.setTimeout(() => {
+          if (submitButton.form && !submitButton.form.checkValidity()) clearPending(submitButton);
+        }, 250);
+      }
+      const link = target.closest<HTMLAnchorElement>('a[href]');
+      if (!link || link.target === '_blank' || link.hasAttribute('download')) return;
+      const href = link.getAttribute('href') ?? '';
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      markPending(link);
+    };
+    const onSubmit = (event: SubmitEvent) => {
+      const submitter = event.submitter;
+      if (!(submitter instanceof HTMLButtonElement)) return;
+      markPending(submitter);
+      window.setTimeout(() => {
+        if (!submitter.isConnected || !submitter.hasAttribute('data-pending')) return;
+        const observer = new MutationObserver(() => clearPending(submitter));
+        observers.set(submitter, observer);
+        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+      }, 100);
+    };
+    document.addEventListener('click', onClick, true);
+    document.addEventListener('submit', onSubmit, true);
+    return () => {
+      document.removeEventListener('click', onClick, true);
+      document.removeEventListener('submit', onSubmit, true);
+      for (const [element, timer] of timers) {
+        clearTimeout(timer);
+        timers.set(element, setTimeout(() => clearPending(element), 500));
+      }
+    };
+  }, [pathname, alreadyRendered]);
 
   if (alreadyRendered) return <>{children}</>;
 
@@ -122,6 +195,11 @@ export default function AppShell({ profile, title, children }: { profile: Profil
             aria-controls="mobile-sidebar" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[#171957] hover:bg-[#f2edda] md:hidden">
             {mobileOpen ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
           </button>
+          <Image src="/brand-logo.png" alt="" width={36} height={36} priority className="h-9 w-9 shrink-0 object-contain md:hidden" />
+          <span className="min-w-0 md:hidden">
+            <span className="block truncate text-xs font-semibold leading-tight tracking-tight text-[#171957]">QR Learning Center</span>
+            <span className="mt-0.5 block text-[10px] font-medium leading-tight text-neutral-500">Deogarh</span>
+          </span>
           {collapsed && <div className="hidden items-center gap-2 md:flex">
             <Image src="/brand-logo.png" alt="" width={36} height={36} priority className="h-9 w-9 shrink-0 object-contain" />
             <span className="text-[13px] font-semibold leading-tight tracking-tight text-[#171957]">QR Learning Center<span className="block text-[11px] font-medium text-neutral-500">Deogarh</span></span>
@@ -179,14 +257,14 @@ export default function AppShell({ profile, title, children }: { profile: Profil
           </div>
         </aside>
         <main className="mx-auto w-full max-w-7xl p-4 md:px-8 md:py-8">
-          <div className="mb-5 flex flex-col items-start justify-between gap-3 border-b border-[#e9e4cf] pb-4 sm:mb-7 sm:flex-row sm:items-center sm:gap-4 sm:pb-5">
+          <div className={`mb-5 flex ${pathname === '/students' || pathname === '/districts' || pathname === '/blocks' || pathname === '/users' ? 'flex-row items-center' : 'flex-col items-start'} justify-between gap-3 border-b border-[#e9e4cf] pb-4 sm:mb-7 sm:flex-row sm:items-center sm:gap-4 sm:pb-5`}>
             <div className="min-w-0">
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8a711d] sm:text-[11px] sm:tracking-[0.18em]">QR Learning Center | Deogarh</p>
               <h1 className="text-xl font-semibold tracking-tight text-[#171957] sm:text-2xl md:text-[1.75rem]">{pageTitle}</h1>
             </div>
-            {pathname === '/students' && profile.role === 'admin' && (
-              <Link href="/students/new" className="btn w-full shrink-0 sm:w-auto">Add student</Link>
-            )}
+            {pathname === '/districts' && profile.role === 'admin' ? <AddDistrictModal /> : pathname === '/blocks' && profile.role === 'admin' ? <AddBlockModal /> : pathname === '/users' && profile.role === 'admin' ? <Link href="/users/create" className="btn shrink-0 px-3">Create user</Link> : (pathname === '/students' && profile.role === 'admin' && (
+              <Link href="/students/new" className="btn shrink-0 px-3 sm:w-auto">Add student</Link>
+            ))}
           </div>
           {children}
         </main>

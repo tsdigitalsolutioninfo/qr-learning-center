@@ -23,3 +23,17 @@ export async function toggleBlock(formData: FormData) {
   await supabase.from('blocks').update({ is_active: formData.get('active') !== 'true' }).eq('id', id);
   revalidatePath('/blocks');
 }
+
+export async function editBlock(formData: FormData) {
+  await requireAdmin();
+  const parsed = z.object({
+    id: z.string().uuid(),
+    name: z.string().trim().min(2).max(100),
+  }).safeParse({ id: formData.get('id'), name: formData.get('name') });
+  if (!parsed.success) redirect('/blocks?error=' + encodeURIComponent('Enter a block name (2-100 characters).'));
+  const supabase = await createClient();
+  const { error } = await supabase.from('blocks').update({ name: parsed.data.name }).eq('id', parsed.data.id);
+  if (error) redirect('/blocks?error=' + encodeURIComponent(error.code === '23505' ? 'That block already exists in this district.' : 'Could not update block.'));
+  revalidatePath('/blocks');
+  redirect('/blocks');
+}

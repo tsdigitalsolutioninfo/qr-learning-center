@@ -28,7 +28,9 @@ export default async function Calls({ searchParams }: { searchParams: Promise<Re
   const link = (p: number) => { const u = new URLSearchParams(Object.entries(sp).filter(([, v]) => v) as [string, string][]); u.set('page', String(p)); return `/calls?${u}`; };
   return (
     <AppShell profile={profile} title={admin ? 'Calls' : 'Call History'}>
-      <form className="mb-4 grid gap-2 md:grid-cols-4">
+      <details className="mb-4 rounded-2xl border border-[#e9e4cf] bg-white p-3 shadow-[0_8px_24px_-20px_rgba(23,25,87,.25)]">
+      <summary className="cursor-pointer px-1 py-1 text-sm font-semibold text-[#171957]">Filters</summary>
+      <form className="mt-3 grid gap-2 md:grid-cols-4">
         <input name="q" defaultValue={sp.q} placeholder="Student name or phone" className="input" aria-label="Search" />
         <select name="status" defaultValue={sp.status ?? ''} className="input" aria-label="Call status"><option value="">Any call status</option>{CALL_STATUSES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
         <select name="interest" defaultValue={sp.interest ?? ''} className="input" aria-label="Interest"><option value="">Any interest</option>{INTERESTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
@@ -36,6 +38,7 @@ export default async function Calls({ searchParams }: { searchParams: Promise<Re
         <input name="from" type="date" defaultValue={sp.from} className="input" aria-label="From" /><input name="to" type="date" defaultValue={sp.to} className="input" aria-label="To" />
         <button className="btn">Filter</button>
       </form>
+      </details>
       {!data?.length ? <p className="text-sm text-neutral-600">No calls found.</p> : (
         <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
           {(data as Row[]).map((c) => (<li key={c.id} className="p-3 text-sm"><Link href={`/students/${c.student_id}`} className="font-medium underline">{c.students?.student_name}</Link>{' '}

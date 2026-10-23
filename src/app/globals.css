@@ -48,7 +48,7 @@ input[type="date"], input[type="datetime-local"], select, textarea { color-schem
   main table { min-width: 40rem; }
   main > form { padding: .75rem; }
   main > section { margin-top: 1.25rem; }
-  .btn, .btn-outline { min-height: 40px; gap: .4rem; border-radius: .7rem; padding-left: .75rem; padding-right: .75rem; font-size: .8125rem; }
+  .btn, .btn-outline { min-height: 40px; gap: .4rem; margin-block: .25rem; border-radius: .7rem; padding-left: .75rem; padding-right: .75rem; font-size: .8125rem; }
   .input { min-height: 42px; border-radius: .7rem; padding-left: .7rem; padding-right: .7rem; font-size: .875rem; }
   .card { border-radius: 1rem; padding: .875rem; }
   .badge { padding: .2rem .55rem; font-size: .6875rem; }

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { createContext, useContext, useState } from 'react';
+import AddDistrictModal from '@/components/districts/AddDistrictModal';
 import {
   Building2,
   ChevronLeft,
@@ -122,6 +123,11 @@ export default function AppShell({ profile, title, children }: { profile: Profil
             aria-controls="mobile-sidebar" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-[#171957] hover:bg-[#f2edda] md:hidden">
             {mobileOpen ? <X aria-hidden="true" size={20} /> : <Menu aria-hidden="true" size={20} />}
           </button>
+          <Image src="/brand-logo.png" alt="" width={36} height={36} priority className="h-9 w-9 shrink-0 object-contain md:hidden" />
+          <span className="min-w-0 md:hidden">
+            <span className="block truncate text-xs font-semibold leading-tight tracking-tight text-[#171957]">QR Learning Center</span>
+            <span className="mt-0.5 block text-[10px] font-medium leading-tight text-neutral-500">Deogarh</span>
+          </span>
           {collapsed && <div className="hidden items-center gap-2 md:flex">
             <Image src="/brand-logo.png" alt="" width={36} height={36} priority className="h-9 w-9 shrink-0 object-contain" />
             <span className="text-[13px] font-semibold leading-tight tracking-tight text-[#171957]">QR Learning Center<span className="block text-[11px] font-medium text-neutral-500">Deogarh</span></span>
@@ -179,14 +185,14 @@ export default function AppShell({ profile, title, children }: { profile: Profil
           </div>
         </aside>
         <main className="mx-auto w-full max-w-7xl p-4 md:px-8 md:py-8">
-          <div className="mb-5 flex flex-col items-start justify-between gap-3 border-b border-[#e9e4cf] pb-4 sm:mb-7 sm:flex-row sm:items-center sm:gap-4 sm:pb-5">
+          <div className={`mb-5 flex ${pathname === '/students' || pathname === '/districts' ? 'flex-row items-center' : 'flex-col items-start'} justify-between gap-3 border-b border-[#e9e4cf] pb-4 sm:mb-7 sm:flex-row sm:items-center sm:gap-4 sm:pb-5`}>
             <div className="min-w-0">
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8a711d] sm:text-[11px] sm:tracking-[0.18em]">QR Learning Center | Deogarh</p>
               <h1 className="text-xl font-semibold tracking-tight text-[#171957] sm:text-2xl md:text-[1.75rem]">{pageTitle}</h1>
             </div>
-            {pathname === '/students' && profile.role === 'admin' && (
-              <Link href="/students/new" className="btn w-full shrink-0 sm:w-auto">Add student</Link>
-            )}
+            {pathname === '/districts' && profile.role === 'admin' ? <AddDistrictModal /> : (pathname === '/students' && profile.role === 'admin' && (
+              <Link href="/students/new" className="btn shrink-0 px-3 sm:w-auto">Add student</Link>
+            ))}
           </div>
           {children}
         </main>

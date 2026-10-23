@@ -42,7 +42,9 @@ export default async function Students({ searchParams }: { searchParams: Promise
   const link = (p: number) => { const u = new URLSearchParams(Object.entries(sp).filter(([, v]) => v) as [string, string][]); u.set('page', String(p)); return `/students?${u}`; };
   return (
     <AppShell profile={profile} title={admin ? 'Students' : 'Block Students'}>
-      <form className="mb-4 grid gap-2 md:grid-cols-6">
+      <details className="mb-4 rounded-2xl border border-[#e9e4cf] bg-white p-3 shadow-[0_8px_24px_-20px_rgba(23,25,87,.25)]">
+      <summary className="cursor-pointer px-1 py-1 text-sm font-semibold text-[#171957]">Filters</summary>
+      <form className="mt-3 grid gap-2 md:grid-cols-6">
         <input name="q" defaultValue={sp.q} placeholder="Search name, phone, school" className="input md:col-span-2" aria-label="Search" />
         <select name="interest" defaultValue={sp.interest ?? ''} className="input" aria-label="Interest"><option value="">Any interest</option>
           {INTERESTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
@@ -51,6 +53,7 @@ export default async function Students({ searchParams }: { searchParams: Promise
           : <select name="contacted" defaultValue={sp.contacted ?? ''} className="input" aria-label="Contacted"><option value="">All</option><option value="no">Not yet contacted</option></select>}
         <button className="btn px-2 md:w-full">Filter</button>
       </form>
+      </details>
       {!rows.length ? <p className="text-sm text-neutral-600">No students found.</p> : (
         <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
           {rows.map((s) => (

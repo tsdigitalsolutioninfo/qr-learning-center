@@ -1,8 +1,17 @@
 import { signIn } from '@/lib/auth/actions';
+import { getProfile } from '@/lib/auth/session';
 import Image from 'next/image';
 import { ArrowRight, LockKeyhole, MapPin, Sparkles } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const profile = await getProfile();
+  if (profile) {
+    if (!profile.is_active) redirect('/unauthorized?reason=inactive');
+    if (profile.must_change_password) redirect('/auth/set-password');
+    redirect('/dashboard');
+  }
+
   const { error } = await searchParams;
 
   return (

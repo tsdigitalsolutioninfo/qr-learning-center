@@ -55,3 +55,18 @@ export async function toggleUser(formData: FormData) {
   await supabase.from('profiles').update({ is_active: formData.get('active') !== 'true' }).eq('id', id).eq('role', 'block_correspondence').throwOnError();
   revalidatePath('/users');
 }
+
+export async function editUser(formData: FormData) {
+  await requireAdmin();
+  const parsed = z.object({
+    id: z.string().uuid(),
+    full_name: z.string().trim().min(2).max(100),
+  }).safeParse({ id: formData.get('id'), full_name: formData.get('full_name') });
+  if (!parsed.success) redirect('/users?error=' + encodeURIComponent('Enter a name between 2 and 100 characters.'));
+  const supabase = await createClient();
+  const { error } = await supabase.from('profiles').update({ full_name: parsed.data.full_name })
+    .eq('id', parsed.data.id).eq('role', 'block_correspondence');
+  if (error) redirect('/users?error=' + encodeURIComponent('Could not update user.'));
+  revalidatePath('/users');
+  redirect('/users');
+}

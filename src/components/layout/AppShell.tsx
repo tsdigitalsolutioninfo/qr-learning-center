@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import AddDistrictModal from '@/components/districts/AddDistrictModal';
 import AddBlockModal from '@/components/blocks/AddBlockModal';
 import {
@@ -16,7 +16,7 @@ import {
   LogOut,
   Settings,
   UserRound,
-  Map,
+  Map as MapIcon,
   Phone,
   Users,
   X,
@@ -47,7 +47,7 @@ const ADMIN_NAV = [
   { href: '/students', label: 'Students', icon: Users },
   { href: '/calls', label: 'Calls', icon: Phone },
   { href: '/follow-ups', label: 'Follow-ups', icon: ClipboardList },
-  { href: '/districts', label: 'Districts', icon: Map },
+  { href: '/districts', label: 'Districts', icon: MapIcon },
   { href: '/blocks', label: 'Blocks', icon: Building2 },
   { href: '/users', label: 'Correspondence', icon: Users },
 ];
@@ -67,6 +67,77 @@ export default function AppShell({ profile, title, children }: { profile: Profil
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const nav = profile.role === 'admin' ? ADMIN_NAV : CS_NAV;
   const pageTitle = title ?? titleForPath(pathname, profile.role);
+
+  useEffect(() => {
+    if (alreadyRendered) return;
+    const timers = new Map<HTMLElement, ReturnType<typeof setTimeout>>();
+    const indicators = new Map<HTMLElement, HTMLSpanElement>();
+    const observers = new Map<HTMLElement, MutationObserver>();
+    const clearPending = (element: HTMLElement) => {
+      element.removeAttribute('data-pending');
+      element.removeAttribute('aria-busy');
+      indicators.get(element)?.remove();
+      indicators.delete(element);
+      observers.get(element)?.disconnect();
+      observers.delete(element);
+      const timer = timers.get(element);
+      if (timer) clearTimeout(timer);
+      timers.delete(element);
+    };
+    const markPending = (element: HTMLElement) => {
+      element.setAttribute('data-pending', 'true');
+      element.setAttribute('aria-busy', 'true');
+      if (!indicators.has(element)) {
+        const dots = document.createElement('span');
+        dots.className = 'loading-dots';
+        dots.setAttribute('aria-hidden', 'true');
+        for (let index = 0; index < 3; index += 1) dots.append(document.createElement('span'));
+        element.append(dots);
+        indicators.set(element, dots);
+      }
+      const prior = timers.get(element);
+      if (prior) clearTimeout(prior);
+      timers.set(element, setTimeout(() => clearPending(element), 15000));
+    };
+    const onClick = (event: MouseEvent) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const submitButton = target.closest<HTMLButtonElement>('button[type="submit"], button:not([type])');
+      if (submitButton?.form) {
+        markPending(submitButton);
+        window.setTimeout(() => {
+          if (submitButton.form && !submitButton.form.checkValidity()) clearPending(submitButton);
+        }, 250);
+      }
+      const link = target.closest<HTMLAnchorElement>('a[href]');
+      if (!link || link.target === '_blank' || link.hasAttribute('download')) return;
+      const href = link.getAttribute('href') ?? '';
+      if (!href || href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:')) return;
+      markPending(link);
+    };
+    const onSubmit = (event: SubmitEvent) => {
+      const submitter = event.submitter;
+      if (!(submitter instanceof HTMLButtonElement)) return;
+      markPending(submitter);
+      window.setTimeout(() => {
+        if (!submitter.isConnected || !submitter.hasAttribute('data-pending')) return;
+        const observer = new MutationObserver(() => clearPending(submitter));
+        observers.set(submitter, observer);
+        observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+      }, 100);
+    };
+    document.addEventListener('click', onClick, true);
+    document.addEventListener('submit', onSubmit, true);
+    return () => {
+      document.removeEventListener('click', onClick, true);
+      document.removeEventListener('submit', onSubmit, true);
+      for (const [element, timer] of timers) {
+        clearTimeout(timer);
+        timers.set(element, setTimeout(() => clearPending(element), 500));
+      }
+    };
+  }, [pathname, alreadyRendered]);
 
   if (alreadyRendered) return <>{children}</>;
 

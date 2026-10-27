@@ -8,6 +8,7 @@ import { fmt } from '@/lib/utils/ist';
 import { telHref } from '@/lib/utils/phone';
 import { CALL_STATUSES, INTERESTS, label } from '@/lib/utils/labels';
 import type { Row } from '@/lib/types';
+import { ClipboardList, Phone } from 'lucide-react';
 import { archiveStudent } from '../actions';
 
 export default async function StudentProfile({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string; error?: string }> }) {
@@ -45,8 +46,8 @@ export default async function StudentProfile({ params, searchParams }: { params:
             </div>
           </div>
           <div className="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto lg:justify-end">
-            {r.phone_number && <a href={telHref(r.phone_number)} className="btn">Call student</a>}
-            {!admin && <Link href={`/students/${id}/call`} className="btn-outline">Record call result</Link>}
+            {r.phone_number && <a href={telHref(r.phone_number)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"><Phone size={16} aria-hidden="true" />Call student</a>}
+            {!admin && <Link href={`/students/${id}/call`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#d4a719] px-4 py-2.5 text-sm font-semibold text-[#171957] transition hover:bg-[#c29812] focus:outline-none focus:ring-2 focus:ring-[#b99b37] focus:ring-offset-2"><ClipboardList size={16} aria-hidden="true" />Record call result</Link>}
           </div>
         </div>
         <div className="grid gap-3 border-t border-[#eeeadd] bg-[#fdfcf8] px-4 py-4 sm:grid-cols-2 sm:gap-4 sm:px-7 sm:py-5 lg:grid-cols-3">

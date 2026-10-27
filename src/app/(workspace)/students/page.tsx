@@ -58,12 +58,12 @@ export default async function Students({ searchParams }: { searchParams: Promise
       {!rows.length ? <p className="text-sm text-neutral-600">No students found.</p> : (
         <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 p-4 sm:p-2">
           {rows.map((s) => (
-            <li key={s.id} className="group relative flex min-w-0 items-center gap-3 rounded-2xl border border-[#e9e4cf] bg-white p-3.5 shadow-[0_8px_24px_-20px_rgba(23,25,87,.25)] transition hover:border-[#d8c77e] hover:bg-[#fffefa] sm:p-4">
-              <Link href={`/students/${s.id}`} aria-label={`Open ${s.student_name}'s profile`} className="absolute inset-0 z-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#b99b37]" />
+            <li key={s.id} className="min-w-0 rounded-2xl border border-[#e9e4cf] bg-white shadow-[0_8px_24px_-20px_rgba(23,25,87,.25)] transition hover:border-[#d8c77e] hover:bg-[#fffefa]">
+              <Link href={`/students/${s.id}`} aria-label={`Open ${s.student_name}'s profile`} className="flex min-w-0 items-center gap-3 rounded-2xl p-3.5 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#b99b37] sm:p-4">
               <div aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#f2edda] text-sm font-bold text-[#171957] ring-1 ring-[#e8dfbd]">
                 {String(s.student_name ?? '?').trim().split(/\s+/).slice(0, 2).map((part: string) => part[0]).join('').toUpperCase()}
               </div>
-              <div className="pointer-events-none relative z-10 min-w-0 flex-1">
+              <div className="min-w-0 flex-1">
                 <div className="flex min-w-0 items-start justify-start gap-1.5">
                   <h2 className="min-w-0 truncate font-semibold text-[#171957]">{s.student_name}</h2>
                   <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#e8dfbd] bg-[#f8f5e9] px-2 py-0.5 text-[11px] font-semibold text-[#6c5818]">
@@ -79,8 +79,9 @@ export default async function Students({ searchParams }: { searchParams: Promise
                   </span>
                 </div>
               </div>
-              <Link href={`/students/${s.id}`} aria-label={`View ${s.student_name}'s profile`} title="View profile" className="relative z-20 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e9e4cf] bg-white text-[#171957] transition hover:bg-[#f8f5e9] focus:outline-none focus:ring-2 focus:ring-[#b99b37]">
+              <span aria-hidden="true" title="View profile" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e9e4cf] bg-white text-[#171957] transition group-hover:bg-[#f8f5e9]">
                 <Eye size={18} aria-hidden="true" />
+              </span>
               </Link>
             </li>))}
         </ul>)}      <div className="mt-4 flex items-center justify-between text-sm">

@@ -6,7 +6,7 @@ import { fmt } from '@/lib/utils/ist';
 import { telHref } from '@/lib/utils/phone';
 import { CALL_STATUSES, INTERESTS, label } from '@/lib/utils/labels';
 import type { Row } from '@/lib/types';
-import { Eye, GraduationCap, MapPin, Phone } from 'lucide-react';
+import { GraduationCap, MapPin, Phone } from 'lucide-react';
 
 const PAGE = 25;
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -79,9 +79,6 @@ export default async function Students({ searchParams }: { searchParams: Promise
                   </span>
                 </div>
               </div>
-              <span aria-hidden="true" title="View profile" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e9e4cf] bg-white text-[#171957] transition group-hover:bg-[#f8f5e9]">
-                <Eye size={18} aria-hidden="true" />
-              </span>
               </Link>
             </li>))}
         </ul>)}      <div className="mt-4 flex items-center justify-between text-sm">

@@ -19,8 +19,6 @@ export default async function RecordCall({ params, searchParams }: { params: Pro
       <div className="mx-auto max-w-5xl">
         <Link href={`/students/${id}`} className="inline-flex items-center gap-2 text-sm font-medium text-neutral-500 transition hover:text-[#171957]">← <span>Back to student profile</span></Link>
         {error && <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
-        {profile.role === 'admin' ? <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">Only a correspondent assigned to this block can record calls.</div> : (
-          <>
             <div className="mt-5 overflow-hidden rounded-2xl border border-[#e9e4cf] bg-white shadow-[0_14px_38px_-28px_rgba(23,25,87,.35)]">
               <div className="flex flex-col gap-5 bg-gradient-to-br from-[#fffdf6] to-white px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
                 <div className="flex min-w-0 items-center gap-4">
@@ -54,8 +52,6 @@ export default async function RecordCall({ params, searchParams }: { params: Pro
               </div>
               <div className="mt-5 flex flex-col-reverse gap-3 rounded-2xl border border-[#e9e4cf] bg-white p-4 shadow-[0_8px_24px_-20px_rgba(23,25,87,.25)] sm:flex-row sm:items-center sm:justify-between sm:px-6"><p className="text-xs text-neutral-500">Your call result will be saved to this student’s record.</p><div className="flex flex-col-reverse gap-2 sm:flex-row"><Link href={`/students/${id}`} className="btn-outline">Cancel</Link><button className="btn">Save call result <span aria-hidden="true">→</span></button></div></div>
             </form>
-          </>
-        )}
       </div>
     </AppShell>
   );

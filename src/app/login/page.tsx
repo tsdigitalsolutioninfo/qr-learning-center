@@ -1,7 +1,7 @@
 import { signIn } from '@/lib/auth/actions';
 import { getProfile } from '@/lib/auth/session';
 import Image from 'next/image';
-import { ArrowRight, LockKeyhole, MapPin, Sparkles } from 'lucide-react';
+import { ArrowRight, KeyRound, Mail, MapPin, Sparkles } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
@@ -51,23 +51,24 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </div>
       </section>
 
-      <section className="relative flex min-h-dvh items-center justify-center px-5 py-12 sm:px-8">
-        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-[#d3b13b]/15 blur-3xl lg:hidden" />
-        <div className="relative w-full max-w-md">
-          <div className="mb-8 flex items-center gap-3 lg:hidden">
-            <Image src="/brand-logo.png" alt="QR Learning Center Deogarh logo" width={60} height={60} priority className="h-[3.75rem] w-[3.75rem] object-contain" />
-            <div>
-              <p className="text-sm font-bold tracking-wide text-[#171957]">QR LEARNING CENTER</p>
-              <p className="text-xs tracking-wider text-neutral-500">DEOGARH</p>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-[#e9e4cf] bg-white p-5 shadow-[0_24px_80px_-36px_rgba(23,25,87,0.2)] sm:p-8 lg:p-10">
-            <div className="mb-8">
-              <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#f7f0d1] text-[#171957]">
-                <LockKeyhole aria-hidden="true" size={21} />
+      <section className="relative flex min-h-dvh items-center justify-center px-5 py-12 sm:px-8 max-lg:items-start max-lg:px-4 max-lg:py-0 sm:max-lg:px-6">
+        <div className="pointer-events-none absolute inset-x-0 top-0 hidden h-64 rounded-b-[2.5rem] bg-gradient-to-br from-[#171957] via-[#10133f] to-[#66551b] max-lg:block" />
+        <div className="absolute left-6 top-8 z-10 hidden text-white max-lg:block sm:left-8">
+          <p className="text-2xl font-semibold leading-tight tracking-tight">Hello,</p>
+          <p className="text-2xl font-semibold leading-tight tracking-tight">Sign in!</p>
+          <p className="mt-2 text-xs text-white/70">Welcome to your outreach workspace</p>
+        </div>
+        <div className="relative w-full max-w-xl lg:max-w-md max-lg:mt-36 max-lg:mb-6">
+          <div className="rounded-3xl border border-[#e9e4cf] bg-white p-5 shadow-[0_24px_80px_-36px_rgba(23,25,87,0.25)] max-lg:rounded-[1.75rem] max-[380px]:p-4 sm:p-8 lg:p-10">
+            <div className="mb-6 flex flex-col items-center gap-2 border-b border-[#eeeadd] pb-4 text-center lg:hidden">
+              <Image src="/brand-logo.png" alt="QR Learning Center Deogarh logo" width={56} height={56} priority className="h-14 w-14 object-contain" />
+              <div>
+                <p className="text-sm font-bold tracking-wide text-[#171957]">QR LEARNING CENTER</p>
+                <p className="text-xs tracking-wider text-neutral-500">DEOGARH</p>
               </div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#8a711d]">Welcome back</p>
+            </div>
+            <div className="mb-8">
+              <p className="mb-2 text-center text-xs font-semibold uppercase tracking-[0.18em] text-[#8a711d] lg:text-left">Welcome back</p>
               <h2 className="text-2xl font-semibold tracking-tight text-[#171957] sm:text-3xl">Sign in to your workspace</h2>
               <p className="mt-2 text-sm leading-6 text-neutral-500">Use the account provided by your administrator to continue.</p>
             </div>
@@ -76,13 +77,19 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <form action={signIn} className="space-y-5">
               <div>
                 <label className="mb-2 block text-sm font-medium text-neutral-800" htmlFor="email">Email address</label>
-                <input id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" className="min-h-12 w-full rounded-xl border border-[#e4dfcd] bg-[#fdfcf8] px-4 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-[#6568a0] focus:bg-white focus:ring-4 focus:ring-[#171957]/10" />
+                <div className="relative">
+                  <Mail aria-hidden="true" size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#81754b] lg:hidden" />
+                  <input id="email" name="email" type="email" required autoComplete="email" placeholder="you@example.com" className="min-h-12 w-full rounded-xl border border-[#e4dfcd] bg-[#fdfcf8] px-4 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-[#6568a0] focus:bg-white focus:ring-4 focus:ring-[#171957]/10 max-lg:pl-11" />
+                </div>
               </div>
               <div>
                 <label className="mb-2 block text-sm font-medium text-neutral-800" htmlFor="password">Password</label>
-                <input id="password" name="password" type="password" required autoComplete="current-password" placeholder="Enter your password" className="min-h-12 w-full rounded-xl border border-[#e4dfcd] bg-[#fdfcf8] px-4 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-[#6568a0] focus:bg-white focus:ring-4 focus:ring-[#171957]/10" />
+                <div className="relative">
+                  <KeyRound aria-hidden="true" size={17} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#81754b] lg:hidden" />
+                  <input id="password" name="password" type="password" required autoComplete="current-password" placeholder="Enter your password" className="min-h-12 w-full rounded-xl border border-[#e4dfcd] bg-[#fdfcf8] px-4 text-sm text-neutral-900 outline-none transition placeholder:text-neutral-400 focus:border-[#6568a0] focus:bg-white focus:ring-4 focus:ring-[#171957]/10 max-lg:pl-11" />
+                </div>
               </div>
-              <button className="group mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#d3b13b] px-4 text-sm font-semibold text-[#171957] shadow-lg shadow-[#171957]/10 transition hover:bg-[#e0c65c] focus:outline-none focus:ring-4 focus:ring-[#d3b13b]/25">
+              <button className="group mt-2 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#d3b13b] px-4 text-sm font-semibold text-[#171957] shadow-lg shadow-[#171957]/10 transition hover:bg-[#e0c65c] focus:outline-none focus:ring-4 focus:ring-[#d3b13b]/25 max-lg:rounded-full">
                 Sign in <ArrowRight aria-hidden="true" size={17} className="transition-transform group-hover:translate-x-0.5" />
               </button>
             </form>

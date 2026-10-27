@@ -252,7 +252,7 @@ export async function recordCall(formData: FormData) {
   // 23505 = same request_id already saved (double submit): treat as success without duplicating.
   if (error && error.code !== '23505') {
     console.error('recordCall', error.code);
-    return fail(back, error.code === '42501' ? 'This student is not in your block.' : 'Could not save the call. Nothing was recorded.');
+    return fail(back, error.code === '42501' ? 'You do not have permission to record a call for this student.' : 'Could not save the call. Nothing was recorded.');
   }
   revalidatePath('/dashboard');
   redirect(`/students/${d.student_id}?saved=1`);

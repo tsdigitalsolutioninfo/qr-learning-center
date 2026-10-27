@@ -25,9 +25,9 @@ export default async function RecordCall({ params, searchParams }: { params: Pro
               <div className="flex flex-col gap-5 bg-gradient-to-br from-[#fffdf6] to-white px-5 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8">
                 <div className="flex min-w-0 items-center gap-4">
                   <div aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#f7f1d9] text-lg font-semibold text-[#776117]">{initials}</div>
-                  <div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-[.12em] text-[#81754b]">Student contact</p><h2 className="mt-1 truncate text-xl font-semibold tracking-tight text-[#171957]">{s.student_name}</h2><p className="mt-1 text-sm text-neutral-500">{s.phone_number}</p></div>
+                  <div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-[.12em] text-[#81754b]">Student contact</p><h2 className="mt-1 truncate text-xl font-semibold tracking-tight text-[#171957]">{s.student_name}</h2><p className="mt-1 text-sm text-neutral-500">{s.phone_number || 'Phone number not provided'}</p></div>
                 </div>
-                <a href={telHref(s.phone_number)} className="btn w-full sm:w-auto"><span aria-hidden="true">☎</span> Call student</a>
+                {s.phone_number && <a href={telHref(s.phone_number)} className="btn w-full sm:w-auto"><span aria-hidden="true">☎</span> Call student</a>}
               </div>
               <div className="flex items-start gap-3 border-t border-[#eeeadd] bg-[#fbfaf6] px-5 py-3.5 text-sm text-neutral-600 sm:px-8"><span className="mt-0.5 text-[#8b7424]" aria-hidden="true">ⓘ</span><p>Calling opens your phone dialer. Return here to record the outcome; calls are not logged automatically.</p></div>
             </div>

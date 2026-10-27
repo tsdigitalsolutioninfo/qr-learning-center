@@ -32,11 +32,11 @@ export default async function FollowUps({ searchParams }: { searchParams: Promis
         <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
           {(data as Row[]).map((f) => (
             <li key={f.id} className="space-y-2 p-3 text-sm">
-              <div><Link href={`/students/${f.student_id}`} className="font-medium underline">{f.students?.student_name}</Link> · {f.students?.phone_number} · {f.students?.blocks?.name}
+              <div><Link href={`/students/${f.student_id}`} className="font-medium underline">{f.students?.student_name}</Link> · {f.students?.phone_number || 'Phone number not provided'} · {f.students?.blocks?.name}
                 <div className="text-neutral-600">{pending ? `Due ${fmt(f.due_at)}` : `Completed ${fmt(f.completed_at)}`} · {f.profiles?.full_name}</div>{f.notes && <div>{f.notes}</div>}</div>
               {pending && (
                 <div className="flex flex-wrap items-center gap-2">
-                  <a href={telHref(f.students?.phone_number)} className="btn">Call</a>
+                  {f.students?.phone_number && <a href={telHref(f.students.phone_number)} className="btn">Call</a>}
                   <form action={completeFollowUp}><input type="hidden" name="id" value={f.id} /><button className="btn-outline">Mark completed</button></form>
                   <form action={rescheduleFollowUp} className="flex w-full gap-1 sm:w-auto"><input type="hidden" name="id" value={f.id} />
                     <input type="datetime-local" name="due_at" required className="input min-w-0 flex-1 sm:w-auto sm:flex-none" aria-label="New date and time (IST)" /><button className="btn-outline shrink-0">Reschedule</button></form>

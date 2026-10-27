@@ -36,7 +36,7 @@ export default async function StudentProfile({ params, searchParams }: { params:
             <div aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#f7f1d9] text-lg font-semibold text-[#776117]">{initials}</div>
             <div className="min-w-0">
               <h2 className="text-xl font-semibold tracking-tight text-[#171957]">{r.student_name}</h2>
-              <a href={telHref(r.phone_number)} className="mt-1 inline-flex text-base font-medium text-[#34366e] hover:underline">{r.phone_number}</a>
+              {r.phone_number ? <a href={telHref(r.phone_number)} className="mt-1 inline-flex text-base font-medium text-[#34366e] hover:underline">{r.phone_number}</a> : <p className="mt-1 text-sm text-neutral-500">Phone number not provided</p>}
               <p className="mt-1 text-sm text-neutral-500">{[r.districts?.name, r.blocks?.name].filter(Boolean).join(' · ') || 'Location not provided'}</p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <span className="badge">{label(INTERESTS, r.interest_status)}</span>
@@ -45,7 +45,7 @@ export default async function StudentProfile({ params, searchParams }: { params:
             </div>
           </div>
           <div className="flex w-full shrink-0 flex-wrap gap-2 sm:w-auto lg:justify-end">
-            <a href={telHref(r.phone_number)} className="btn">Call student</a>
+            {r.phone_number && <a href={telHref(r.phone_number)} className="btn">Call student</a>}
             {!admin && <Link href={`/students/${id}/call`} className="btn-outline">Record call result</Link>}
           </div>
         </div>

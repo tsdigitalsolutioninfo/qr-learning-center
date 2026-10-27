@@ -27,7 +27,7 @@ export default async function RecordCall({ params, searchParams }: { params: Pro
                   <div aria-hidden="true" className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#f7f1d9] text-lg font-semibold text-[#776117]">{initials}</div>
                   <div className="min-w-0"><p className="text-xs font-semibold uppercase tracking-[.12em] text-[#81754b]">Student contact</p><h2 className="mt-1 truncate text-xl font-semibold tracking-tight text-[#171957]">{s.student_name}</h2><p className="mt-1 text-sm text-neutral-500">{s.phone_number || 'Phone number not provided'}</p></div>
                 </div>
-                {s.phone_number && <a href={telHref(s.phone_number)} className="btn w-full sm:w-auto"><span aria-hidden="true">☎</span> Call student</a>}
+                {s.phone_number && <a href={telHref(s.phone_number)} className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 sm:w-auto"><span aria-hidden="true">☎</span> Call student</a>}
               </div>
               <div className="flex items-start gap-3 border-t border-[#eeeadd] bg-[#fbfaf6] px-5 py-3.5 text-sm text-neutral-600 sm:px-8"><span className="mt-0.5 text-[#8b7424]" aria-hidden="true">ⓘ</span><p>Calling opens your phone dialer. Return here to record the outcome; calls are not logged automatically.</p></div>
             </div>

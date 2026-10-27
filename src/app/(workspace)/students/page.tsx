@@ -6,7 +6,7 @@ import { fmt } from '@/lib/utils/ist';
 import { telHref } from '@/lib/utils/phone';
 import { CALL_STATUSES, INTERESTS, label } from '@/lib/utils/labels';
 import type { Row } from '@/lib/types';
-import { Eye, GraduationCap, MapPin, Phone } from 'lucide-react';
+import { GraduationCap, MapPin, Phone } from 'lucide-react';
 
 const PAGE = 25;
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -22,7 +22,6 @@ const callStatusStyle = (status: string | null) => {
     default: return 'border-neutral-200 bg-neutral-100 text-neutral-600';
   }
 };
-
 export default async function Students({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const profile = await requireProfile();
   const admin = profile.role === 'admin';
@@ -73,15 +72,13 @@ export default async function Students({ searchParams }: { searchParams: Promise
                 </div>
                 <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-600">
                   <span className="inline-flex items-center gap-1"><MapPin size={13} aria-hidden="true" />{s.blocks?.name || 'Block not set'}</span>
-                  <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${callStatusStyle(s.last_call_status)}`}>
-                    <Phone size={12} aria-label="Last call status" />
+                  <span title={`Last call: ${s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}`} className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[11px] font-medium ${callStatusStyle(s.last_call_status)}`}>
+                    <Phone size={12} aria-hidden="true" />
                     {s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}
                   </span>
                 </div>
+                <p className="mt-1 truncate text-xs text-neutral-500">{s.phone_number || 'Phone number not provided'}</p>
               </div>
-              <span aria-hidden="true" title="View profile" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e9e4cf] bg-white text-[#171957] transition group-hover:bg-[#f8f5e9]">
-                <Eye size={18} aria-hidden="true" />
-              </span>
               </Link>
             </li>))}
         </ul>)}      <div className="mt-4 flex items-center justify-between text-sm">

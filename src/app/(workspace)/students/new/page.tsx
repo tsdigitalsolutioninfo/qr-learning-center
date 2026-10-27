@@ -38,7 +38,7 @@ export default async function NewStudent({ searchParams }: { searchParams: Promi
               <div className="rounded-xl border border-[#eeeadd] bg-[#fdfcf8] p-4">
                 <p className="text-sm font-semibold text-[#26274e]">Before you upload</p>
                 <ol className="mt-2 space-y-2 text-sm leading-5 text-neutral-600">
-                  <li className="flex gap-2"><span className="font-semibold text-[#8a711d]">1.</span><span>Download the template and fill in student, district, and block details.</span></li>
+                  <li className="flex gap-2"><span className="font-semibold text-[#8a711d]">1.</span><span>Download the template and fill in student, district, and block details. Phone numbers are optional; enter a 10-digit number with or without +91.</span></li>
                   <li className="flex gap-2"><span className="font-semibold text-[#8a711d]">2.</span><span>Choose the completed <strong className="font-medium text-neutral-700">.xlsx</strong> workbook below.</span></li>
                   <li className="flex gap-2"><span className="font-semibold text-[#8a711d]">3.</span><span>Review any row errors and correct the workbook before retrying.</span></li>
                 </ol>
@@ -47,7 +47,7 @@ export default async function NewStudent({ searchParams }: { searchParams: Promi
               <div className="rounded-xl border border-[#e9e4cf] bg-white p-4">
                 <BulkStudentUploadForm />
               </div>
-              <p className="text-xs leading-5 text-neutral-500">Maximum 500 students and 5 MB per workbook. Every row is checked before import; if any row is invalid or a phone number is already in use, no students are imported. Students are assigned to the correspondent for their block.</p>
+              <p className="text-xs leading-5 text-neutral-500">Maximum 500 students and 5 MB per workbook. Every row is checked before import; if any row is invalid, no students are imported. Duplicate phone numbers are allowed. Students are assigned to the correspondent for their block.</p>
             </div>
           </section>
         </div>)}

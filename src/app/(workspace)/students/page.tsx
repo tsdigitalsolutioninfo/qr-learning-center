@@ -59,7 +59,7 @@ export default async function Students({ searchParams }: { searchParams: Promise
           {rows.map((s) => (
             <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
               <div className="w-full min-w-0 flex-1 sm:w-auto"><Link href={`/students/${s.id}`} className="break-words font-medium underline">{s.student_name}</Link>
-                <div className="text-sm text-neutral-600">{s.phone_number} · {s.blocks?.name}{s.school_name ? ` · ${s.school_name}` : ''}{s.class_name ? ` (${s.class_name})` : ''}</div>
+                <div className="text-sm text-neutral-600">{s.phone_number || 'Phone number not provided'} · {s.blocks?.name}{s.school_name ? ` · ${s.school_name}` : ''}{s.class_name ? ` (${s.class_name})` : ''}</div>
                 <div className="text-xs text-neutral-500"><span className="badge">{label(INTERESTS, s.interest_status)}</span>{' '}
                   Last call: {fmt(s.last_call_at)} · Next follow-up: {fmt(s.next_follow_up_at)}</div></div>
               {admin && <div className="flex w-full shrink-0 flex-col items-start gap-1 sm:ml-auto sm:w-auto sm:items-end">
@@ -72,7 +72,7 @@ export default async function Students({ searchParams }: { searchParams: Promise
                 <span className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${callStatusStyle(s.last_call_status)}`}>
                   {s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}
                 </span>
-                <a href={telHref(s.phone_number)} className="btn">Call</a>
+                {s.phone_number && <a href={telHref(s.phone_number)} className="btn">Call</a>}
                 <Link href={`/students/${s.id}/call`} className="btn-outline">Call status</Link></div>}
             </li>))}
         </ul>)}

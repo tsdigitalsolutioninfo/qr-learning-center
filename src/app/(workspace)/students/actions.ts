@@ -26,7 +26,7 @@ export type BulkUploadState = {
 
 const bulkStudentSchema = z.object({
   student_name: z.string().trim().min(2).max(120),
-  phone_number: z.string().trim().min(1),
+  phone_number: z.string().trim().optional().transform((value) => value || null),
   district: z.string().trim().min(1).max(100),
   block: z.string().trim().min(1).max(100),
   school_name: opt,
@@ -69,19 +69,21 @@ export async function bulkUploadStudents(_previousState: BulkUploadState, formDa
   const worksheet = workbook.worksheets[0];
   if (!worksheet) return importFailure('The workbook does not contain a worksheet.');
   if (worksheet.rowCount < 2) return importFailure('The first worksheet does not contain any student rows.');
-  if (worksheet.rowCount > MAX_UPLOAD_ROWS + 1) return importFailure(`Upload no more than ${MAX_UPLOAD_ROWS} student rows at a time.`);
 
   const columnIndexes: Record<string, number> = {};
   const duplicateHeaders: string[] = [];
   const headerRow = worksheet.getRow(1);
-  if (headerRow.cellCount > 20) return importFailure('The header row has too many columns.');
-  for (let column = 1; column <= headerRow.cellCount; column += 1) {
-    const name = headerRow.getCell(column).text.trim().replace(/^\uFEFF/, '').replace(/\s+/g, ' ').toLocaleLowerCase('en');
-    if (!name) continue;
+  let headerCount = 0;
+  headerRow.eachCell((cell, column) => {
+    const name = cell.text.trim().replace(/^\uFEFF/, '').replace(/\s+/g, ' ').toLocaleLowerCase('en');
+    if (!name) return;
+    headerCount += 1;
+    if (headerCount > 20) return;
     if (columnIndexes[name]) duplicateHeaders.push(name);
     else columnIndexes[name] = column;
-  }
-  const requiredHeaders = ['student name', 'phone number', 'district', 'block'];
+  });
+  if (headerCount > 20) return importFailure('The header row has too many columns.');
+  const requiredHeaders = ['student name', 'district', 'block'];
   const missingHeaders = requiredHeaders.filter((header) => !columnIndexes[header]);
   if (duplicateHeaders.length) return importFailure(`Duplicate column headers: ${duplicateHeaders.join(', ')}.`);
   if (missingHeaders.length) return importFailure(`Missing required columns: ${missingHeaders.map((header) => `"${header}"`).join(', ')}.`);
@@ -89,7 +91,7 @@ export async function bulkUploadStudents(_previousState: BulkUploadState, formDa
   const issues: string[] = [];
   const rowsToInsert: {
     student_name: string;
-    phone_number: string;
+    phone_number: string | null;
     district_id: string;
     block_id: string;
     school_name: string | null;
@@ -98,7 +100,6 @@ export async function bulkUploadStudents(_previousState: BulkUploadState, formDa
     interest_status: 'unknown';
     created_by: string;
   }[] = [];
-  const firstRowByPhone = new Map<string, number>();
   const fieldLabels: Record<string, string> = {
     student_name: 'Student name',
     phone_number: 'Phone number',
@@ -132,18 +133,23 @@ export async function bulkUploadStudents(_previousState: BulkUploadState, formDa
     block.id,
   ]));
 
-  const optionalHeaders = ['school', 'class', 'notes'];
+  const optionalHeaders = ['phone number', 'school', 'class', 'notes'];
   const usedColumns = [...requiredHeaders, ...optionalHeaders]
     .map((header) => columnIndexes[header])
     .filter((column): column is number => Boolean(column));
   let nonEmptyRows = 0;
+  let exceededRowLimit = false;
   for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber += 1) {
     const row = worksheet.getRow(rowNumber);
     if (usedColumns.every((column) => !row.getCell(column).text.trim())) continue;
     nonEmptyRows += 1;
+    if (nonEmptyRows > MAX_UPLOAD_ROWS) {
+      exceededRowLimit = true;
+      break;
+    }
     const values = {
       student_name: getText(row, columnIndexes['student name'], rowNumber, 'Student name'),
-      phone_number: getText(row, columnIndexes['phone number'], rowNumber, 'Phone number'),
+      phone_number: columnIndexes['phone number'] ? getText(row, columnIndexes['phone number'], rowNumber, 'Phone number') : '',
       district: getText(row, columnIndexes.district, rowNumber, 'District'),
       block: getText(row, columnIndexes.block, rowNumber, 'Block'),
       school_name: columnIndexes.school ? getText(row, columnIndexes.school, rowNumber, 'School') : '',
@@ -158,18 +164,11 @@ export async function bulkUploadStudents(_previousState: BulkUploadState, formDa
       });
       continue;
     }
-    const phone = normalizePhone(parsed.data.phone_number);
-    if (!phone) {
+    const phone = parsed.data.phone_number ? normalizePhone(parsed.data.phone_number) : null;
+    if (parsed.data.phone_number && !phone) {
       issues.push(`Row ${rowNumber}: Enter a valid Indian mobile number.`);
       continue;
     }
-    const previousRow = firstRowByPhone.get(phone);
-    if (previousRow) {
-      issues.push(`Row ${rowNumber}: Phone number duplicates row ${previousRow}.`);
-      continue;
-    }
-    firstRowByPhone.set(phone, rowNumber);
-
     const districtId = districtIdsByName.get(locationKey(parsed.data.district));
     if (!districtId) {
       issues.push(`Row ${rowNumber}: District "${parsed.data.district}" does not match an active district.`);
@@ -192,26 +191,9 @@ export async function bulkUploadStudents(_previousState: BulkUploadState, formDa
       created_by: me.id,
     });
   }
+  if (exceededRowLimit) return importFailure(`Upload no more than ${MAX_UPLOAD_ROWS} student rows at a time.`);
   if (!nonEmptyRows) return importFailure('The first worksheet does not contain any student rows.');
   if (issues.length) return importFailure('No students were imported. Correct the rows below and upload the workbook again.', issues);
-
-  const phones = [...firstRowByPhone.keys()];
-  const existingPhones = new Set<string>();
-  for (let offset = 0; offset < phones.length; offset += 100) {
-    const { data: existing, error } = await supabase.from('students').select('phone_number').in('phone_number', phones.slice(offset, offset + 100));
-    if (error) {
-      console.error('bulkUploadStudents: duplicate lookup failed', error.code);
-      return importFailure('Could not check for existing phone numbers. No students were imported.');
-    }
-    existing?.forEach((student) => existingPhones.add(student.phone_number));
-  }
-  if (existingPhones.size) {
-    const duplicates = [...existingPhones].flatMap((phone) => {
-      const rowNumber = firstRowByPhone.get(phone);
-      return rowNumber ? [`Row ${rowNumber}: Phone number already exists in the student list.`] : [];
-    });
-    return importFailure('No students were imported. Remove existing phone numbers and upload the workbook again.', duplicates);
-  }
 
   const { error } = await supabase.from('students').insert(rowsToInsert);
   if (error) {

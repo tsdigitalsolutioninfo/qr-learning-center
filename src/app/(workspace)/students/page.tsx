@@ -6,6 +6,7 @@ import { fmt } from '@/lib/utils/ist';
 import { telHref } from '@/lib/utils/phone';
 import { CALL_STATUSES, INTERESTS, label } from '@/lib/utils/labels';
 import type { Row } from '@/lib/types';
+import { Eye, GraduationCap, MapPin, Phone } from 'lucide-react';
 
 const PAGE = 25;
 const UUID = /^[0-9a-f-]{36}$/i;
@@ -55,28 +56,34 @@ export default async function Students({ searchParams }: { searchParams: Promise
       </form>
       </details>
       {!rows.length ? <p className="text-sm text-neutral-600">No students found.</p> : (
-        <ul className="divide-y divide-neutral-200 rounded-lg border border-neutral-200">
+        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 p-4 sm:p-2">
           {rows.map((s) => (
-            <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 p-3">
-              <div className="w-full min-w-0 flex-1 sm:w-auto"><Link href={`/students/${s.id}`} className="break-words font-medium underline">{s.student_name}</Link>
-                <div className="text-sm text-neutral-600">{s.phone_number || 'Phone number not provided'} · {s.blocks?.name}{s.school_name ? ` · ${s.school_name}` : ''}{s.class_name ? ` (${s.class_name})` : ''}</div>
-                <div className="text-xs text-neutral-500"><span className="badge">{label(INTERESTS, s.interest_status)}</span>{' '}
-                  Last call: {fmt(s.last_call_at)} · Next follow-up: {fmt(s.next_follow_up_at)}</div></div>
-              {admin && <div className="flex w-full shrink-0 flex-col items-start gap-1 sm:ml-auto sm:w-auto sm:items-end">
-                <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${callStatusStyle(s.last_call_status)}`}>
-                  {s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}
-                </span>
-                <span className="text-xs text-neutral-500">{s.call_logs?.[0]?.count ?? 0} call attempts</span>
-              </div>}
-              {!admin && <div className="flex w-full flex-wrap items-center justify-start gap-2 sm:w-auto sm:justify-end">
-                <span className={`inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${callStatusStyle(s.last_call_status)}`}>
-                  {s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}
-                </span>
-                {s.phone_number && <a href={telHref(s.phone_number)} className="btn">Call</a>}
-                <Link href={`/students/${s.id}/call`} className="btn-outline">Call status</Link></div>}
+            <li key={s.id} className="group relative flex min-w-0 items-center gap-3 rounded-2xl border border-[#e9e4cf] bg-white p-3.5 shadow-[0_8px_24px_-20px_rgba(23,25,87,.25)] transition hover:border-[#d8c77e] hover:bg-[#fffefa] sm:p-4">
+              <Link href={`/students/${s.id}`} aria-label={`Open ${s.student_name}'s profile`} className="absolute inset-0 z-0 rounded-2xl focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#b99b37]" />
+              <div aria-hidden="true" className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#f2edda] text-sm font-bold text-[#171957] ring-1 ring-[#e8dfbd]">
+                {String(s.student_name ?? '?').trim().split(/\s+/).slice(0, 2).map((part: string) => part[0]).join('').toUpperCase()}
+              </div>
+              <div className="pointer-events-none relative z-10 min-w-0 flex-1">
+                <div className="flex min-w-0 items-start justify-start gap-1.5">
+                  <h2 className="min-w-0 truncate font-semibold text-[#171957]">{s.student_name}</h2>
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-[#e8dfbd] bg-[#f8f5e9] px-2 py-0.5 text-[11px] font-semibold text-[#6c5818]">
+                    <GraduationCap size={13} aria-hidden="true" />
+                    {s.class_name || 'Class not set'}
+                  </span>
+                </div>
+                <div className="mt-1.5 flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-neutral-600">
+                  <span className="inline-flex items-center gap-1"><MapPin size={13} aria-hidden="true" />{s.blocks?.name || 'Block not set'}</span>
+                  <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${callStatusStyle(s.last_call_status)}`}>
+                    <Phone size={12} aria-label="Last call status" />
+                    {s.last_call_status ? label(CALL_STATUSES, s.last_call_status) : 'Pending'}
+                  </span>
+                </div>
+              </div>
+              <Link href={`/students/${s.id}`} aria-label={`View ${s.student_name}'s profile`} title="View profile" className="relative z-20 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#e9e4cf] bg-white text-[#171957] transition hover:bg-[#f8f5e9] focus:outline-none focus:ring-2 focus:ring-[#b99b37]">
+                <Eye size={18} aria-hidden="true" />
+              </Link>
             </li>))}
-        </ul>)}
-      <div className="mt-4 flex items-center justify-between text-sm">
+        </ul>)}      <div className="mt-4 flex items-center justify-between text-sm">
         {page > 1 ? <Link className="btn-outline" href={link(page - 1)}>Previous</Link> : <span />}
         <span>Page {page} of {pages} · {count ?? 0} students</span>
         {page < pages ? <Link className="btn-outline" href={link(page + 1)}>Next</Link> : <span />}

@@ -2,8 +2,12 @@ import { createServerClient, type SetAllCookies } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const PUBLIC = ['/login', '/unauthorized'];
+const PUBLIC_PWA_ASSETS = new Set(['/manifest.webmanifest', '/offline.html', '/sw.js']);
 
 export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+  if (PUBLIC_PWA_ASSETS.has(path)) return NextResponse.next();
+
   let response = NextResponse.next({ request });
   const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
     cookies: {
@@ -16,7 +20,6 @@ export async function middleware(request: NextRequest) {
     },
   });
   const { data: { user } } = await supabase.auth.getUser(); // refreshes expired sessions
-  const path = request.nextUrl.pathname;
   if (!user && path !== '/' && !PUBLIC.some((p) => path.startsWith(p))) {
     const url = request.nextUrl.clone(); url.pathname = '/login'; url.search = '';
     return NextResponse.redirect(url);

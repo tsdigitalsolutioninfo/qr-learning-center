@@ -28,19 +28,19 @@ body { background: var(--canvas); color: #17172b; }
 }
 
 /* Shared workspace surfaces keep list, table, and empty states aligned. */
-main > ul { overflow: hidden; border-color: var(--line); border-radius: 1rem; background: white; box-shadow: 0 8px 24px -20px rgba(23, 25, 87, .25); }
-main > ul > li { transition: background-color .15s ease; }
-main > ul > li:hover { background-color: #fdfcf7; }
-main > form { padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: white; box-shadow: 0 8px 24px -20px rgba(23, 25, 87, .25); }
-main > section { margin-top: 2rem; }
-main > section > h2 { margin-bottom: .75rem; color: var(--brand-navy); font-size: 1rem; font-weight: 650; letter-spacing: -.01em; }
-main table { border-collapse: separate; border-spacing: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 1rem; background: white; }
-main table thead { background: #fbf7e8; }
-main table th { padding: .85rem .75rem; font-size: .72rem; font-weight: 600; letter-spacing: .045em; text-transform: uppercase; color: #5b5b75; }
-main table td { padding-top: .85rem; padding-bottom: .85rem; }
-main table tbody tr:last-child { border-bottom: 0; }
-main a:not(.btn):not(.btn-outline) { text-underline-offset: 3px; }
-main a:not(.btn):not(.btn-outline):hover { color: var(--brand-navy); }
+main:not(.landing-page) > ul { overflow: hidden; border-color: var(--line); border-radius: 1rem; background: white; box-shadow: 0 8px 24px -20px rgba(23, 25, 87, .25); }
+main:not(.landing-page) > ul > li { transition: background-color .15s ease; }
+main:not(.landing-page) > ul > li:hover { background-color: #fdfcf7; }
+main:not(.landing-page) > form { padding: 1rem; border: 1px solid var(--line); border-radius: 1rem; background: white; box-shadow: 0 8px 24px -20px rgba(23, 25, 87, .25); }
+main:not(.landing-page) > section { margin-top: 2rem; }
+main:not(.landing-page) > section > h2 { margin-bottom: .75rem; color: var(--brand-navy); font-size: 1rem; font-weight: 650; letter-spacing: -.01em; }
+main:not(.landing-page) table { border-collapse: separate; border-spacing: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 1rem; background: white; }
+main:not(.landing-page) table thead { background: #fbf7e8; }
+main:not(.landing-page) table th { padding: .85rem .75rem; font-size: .72rem; font-weight: 600; letter-spacing: .045em; text-transform: uppercase; color: #5b5b75; }
+main:not(.landing-page) table td { padding-top: .85rem; padding-bottom: .85rem; }
+main:not(.landing-page) table tbody tr:last-child { border-bottom: 0; }
+main:not(.landing-page) a:not(.btn):not(.btn-outline) { text-underline-offset: 3px; }
+main:not(.landing-page) a:not(.btn):not(.btn-outline):hover { color: var(--brand-navy); }
 input[type="date"], input[type="datetime-local"], select, textarea { color-scheme: light; }
 
 .loading-dots {
@@ -69,10 +69,10 @@ input[type="date"], input[type="datetime-local"], select, textarea { color-schem
 }
 
 @media (max-width: 640px) {
-  main { padding: .875rem !important; }
-  main table { min-width: 40rem; }
-  main > form { padding: .75rem; }
-  main > section { margin-top: 1.25rem; }
+  main:not(.landing-page) { padding: .875rem !important; }
+  main:not(.landing-page) table { min-width: 40rem; }
+  main:not(.landing-page) > form { padding: .75rem; }
+  main:not(.landing-page) > section { margin-top: 1.25rem; }
   .btn, .btn-outline { min-height: 40px; gap: .4rem; margin-block: .25rem; border-radius: .7rem; padding-left: .75rem; padding-right: .75rem; font-size: .8125rem; }
   .input { min-height: 42px; border-radius: .7rem; padding-left: .7rem; padding-right: .7rem; font-size: .875rem; }
   .card { border-radius: 1rem; padding: .875rem; }

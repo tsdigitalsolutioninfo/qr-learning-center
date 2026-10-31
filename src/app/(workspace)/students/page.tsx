@@ -6,6 +6,7 @@ import { fmt } from '@/lib/utils/ist';
 import { telHref } from '@/lib/utils/phone';
 import { CALL_STATUSES, INTERESTS, label } from '@/lib/utils/labels';
 import type { Row } from '@/lib/types';
+import StudentLocationFilters from '@/components/students/StudentLocationFilters';
 import { GraduationCap, MapPin, Phone } from 'lucide-react';
 
 const PAGE = 25;
@@ -34,9 +35,24 @@ export default async function Students({ searchParams }: { searchParams: Promise
   const term = (sp.q ?? '').replace(/[,()%*\\]/g, ' ').trim();
   if (term) q = q.or(`student_name.ilike.%${term}%,phone_number.ilike.%${term}%,school_name.ilike.%${term}%`);
   if (sp.interest && INTERESTS.some(([k]) => k === sp.interest)) q = q.eq('interest_status', sp.interest);
-  if (admin && sp.block && UUID.test(sp.block)) q = q.eq('block_id', sp.block);
+  const district = admin && sp.district && UUID.test(sp.district) ? sp.district : '';
+  const block = district && sp.block && UUID.test(sp.block) ? sp.block : '';
+  if (district) q = q.eq('district_id', district);
+  if (block) q = q.eq('block_id', block);
   if (sp.contacted === 'no') q = q.is('last_call_at', null);
-  const [{ data, count }, { data: blocks }] = await Promise.all([q, admin ? supabase.from('blocks').select('id, name').order('name') : Promise.resolve({ data: [] as Row[] })]);
+  const [{ data, count }, { data: districts }] = await Promise.all([
+    q,
+    admin ? supabase.from('districts').select('id, name, blocks(id, name)').order('name') : Promise.resolve({ data: null }),
+  ]);
+  const districtOptions = (districts ?? []).map((d) => ({
+    id: d.id,
+    name: d.name,
+    blocks: d.blocks ?? [],
+  }));
+  const selectedDistrict = districtOptions.find((d) => d.id === district)?.id ?? '';
+  const selectedBlock = districtOptions.find((d) => d.id === selectedDistrict)?.blocks.some((b) => b.id === block)
+    ? block
+    : '';
   const rows = (data ?? []) as Row[];
   const pages = Math.max(1, Math.ceil((count ?? 0) / PAGE));
   const link = (p: number) => { const u = new URLSearchParams(Object.entries(sp).filter(([, v]) => v) as [string, string][]); u.set('page', String(p)); return `/students?${u}`; };
@@ -48,8 +64,7 @@ export default async function Students({ searchParams }: { searchParams: Promise
         <input name="q" defaultValue={sp.q} placeholder="Search name, phone, school" className="input md:col-span-2" aria-label="Search" />
         <select name="interest" defaultValue={sp.interest ?? ''} className="input" aria-label="Interest"><option value="">Any interest</option>
           {INTERESTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
-        {admin ? <select name="block" defaultValue={sp.block ?? ''} className="input" aria-label="Block"><option value="">All blocks</option>
-          {(blocks as Row[]).map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}</select>
+        {admin ? <StudentLocationFilters districts={districtOptions} selectedDistrict={selectedDistrict} selectedBlock={selectedBlock} />
           : <select name="contacted" defaultValue={sp.contacted ?? ''} className="input" aria-label="Contacted"><option value="">All</option><option value="no">Not yet contacted</option></select>}
         <button className="btn px-2 md:w-full">Filter</button>
       </form>

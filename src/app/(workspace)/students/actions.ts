@@ -230,12 +230,22 @@ export async function archiveStudent(formData: FormData) {
 
 const callSchema = z.object({
   student_id: z.string().uuid(), request_id: z.string().uuid(), call_status: z.enum(callValues), interest_status: z.enum(interestValues),
+  exam_applications: z.array(z.enum(['jnv', 'oav', 'none'])).max(2).refine((values) => new Set(values).size === values.length && (!values.includes('none') || values.length === 1)),
+  admit_card_downloaded: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  interested_oav: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
   notes: z.string().trim().max(2000).optional().transform((v) => v || null), follow_up_at: z.string().optional(),
+}).superRefine((data, context) => {
+  if (!data.exam_applications.includes('jnv') && data.admit_card_downloaded !== null) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['admit_card_downloaded'], message: 'JNV application is required.' });
+  }
 });
 export async function recordCall(formData: FormData) {
   const me = await requireProfile();
   const back = `/students/${String(formData.get('student_id'))}/call`;
-  const parsed = callSchema.safeParse(Object.fromEntries(formData));
+  const parsed = callSchema.safeParse({
+    ...Object.fromEntries(formData),
+    exam_applications: formData.getAll('exam_applications'),
+  });
   if (!parsed.success) return fail(back, 'Please check the call details.');
   const d = parsed.data;
   const required = formData.get('follow_up_required') === 'on';
@@ -247,6 +257,9 @@ export async function recordCall(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.from('call_logs').insert({
     student_id: d.student_id, called_by: me.id, call_status: d.call_status, interest_status: d.interest_status, notes: d.notes,
+    exam_applications: d.exam_applications.length ? d.exam_applications : null,
+    admit_card_downloaded: d.admit_card_downloaded,
+    interested_oav: d.interested_oav,
     follow_up_required: required, follow_up_at: followUp, request_id: d.request_id, call_started_at: null,
   });
   // 23505 = same request_id already saved (double submit): treat as success without duplicating.

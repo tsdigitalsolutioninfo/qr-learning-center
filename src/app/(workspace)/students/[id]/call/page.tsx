@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { telHref } from '@/lib/utils/phone';
 import { CALL_STATUSES, INTERESTS } from '@/lib/utils/labels';
 import { recordCall } from '../../actions';
+import CallApplicationQuestions from '@/components/students/CallApplicationQuestions';
 
 export default async function RecordCall({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ error?: string }> }) {
   const profile = await requireProfile();
@@ -38,6 +39,7 @@ export default async function RecordCall({ params, searchParams }: { params: Pro
                   <div className="space-y-5 p-5 sm:p-7">
                     <div><label className="label" htmlFor="call_status">Call status <span className="text-red-600">*</span></label><select id="call_status" name="call_status" required className="input"><option value="" disabled>Select a call outcome</option>{CALL_STATUSES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
                     <div><label className="label" htmlFor="interest_status">Student interest</label><select id="interest_status" name="interest_status" defaultValue={s.interest_status} className="input">{INTERESTS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select></div>
+                    <CallApplicationQuestions />
                     <div><label className="label" htmlFor="notes">Conversation notes <span className="font-normal text-neutral-400">(optional)</span></label><textarea id="notes" name="notes" rows={5} placeholder="Key questions, information shared, or next steps…" className="input min-h-32 resize-y py-3 leading-6" /></div>
                   </div>
                 </div>

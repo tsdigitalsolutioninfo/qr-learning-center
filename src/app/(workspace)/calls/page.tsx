@@ -34,7 +34,7 @@ export default async function Calls({ searchParams }: { searchParams: Promise<Re
   const page = Math.max(1, Number(sp.page) || 1);
   const supabase = await createClient();
   let q = supabase.from('call_logs')
-    .select('id, student_id, call_status, interest_status, notes, created_at, students!inner(student_name, phone_number, blocks(name)), profiles!call_logs_called_by_fkey(full_name)', { count: 'exact' })
+    .select('id, student_id, call_status, interest_status, exam_applications, admit_card_downloaded, interested_oav, notes, created_at, students!inner(student_name, phone_number, blocks(name)), profiles!call_logs_called_by_fkey(full_name)', { count: 'exact' })
     .order('created_at', { ascending: false }).range((page - 1) * PAGE, page * PAGE - 1);
   const term = (sp.q ?? '').replace(/[,()%*\\]/g, ' ').trim();
   if (term) q = q.or(`student_name.ilike.%${term}%,phone_number.ilike.%${term}%`, { referencedTable: 'students' });
@@ -80,6 +80,9 @@ export default async function Calls({ searchParams }: { searchParams: Promise<Re
                     <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${c.interest_status === 'interested' || c.interest_status === 'registered' ? 'bg-violet-50 text-violet-700' : c.interest_status === 'not_interested' ? 'bg-neutral-100 text-neutral-600' : 'bg-[#fbf5dc] text-[#776117]'}`}><Star size={13} aria-hidden="true" />{label(INTERESTS, c.interest_status)}</span>
                     <span className="inline-flex items-center gap-1 text-xs text-neutral-500"><CalendarDays size={13} aria-hidden="true" />{fmt(c.created_at)}</span>
                   </div>
+                  {Array.isArray(c.exam_applications) && c.exam_applications.length > 0 && <p className="mt-2 text-sm text-neutral-700">Applied for: {c.exam_applications.map((exam: string) => exam === 'none' ? 'None of these' : exam.toUpperCase()).join(', ')}</p>}
+                  {c.admit_card_downloaded !== null && c.admit_card_downloaded !== undefined && <p className="mt-1 text-sm text-neutral-700">JNV admit card downloaded: {c.admit_card_downloaded ? 'Yes' : 'No'}</p>}
+                  {c.interested_oav !== null && c.interested_oav !== undefined && <p className="mt-1 text-sm text-neutral-700">Interested in OAV: {c.interested_oav ? 'Yes' : 'No'}</p>}
                   {c.notes && <div className="mt-3 whitespace-pre-wrap rounded-xl bg-[#fbfaf6] px-3 py-2 text-sm leading-5 text-neutral-700"><span className="font-medium text-neutral-800">Notes:</span> {c.notes}</div>}
                 </div>
               </div>

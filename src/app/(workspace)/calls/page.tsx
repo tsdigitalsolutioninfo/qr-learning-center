@@ -3,7 +3,7 @@ import AppShell from '@/components/layout/AppShell';
 import { requireProfile } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { fmt, istInputToIso } from '@/lib/utils/ist';
-import { CALL_STATUSES, INTERESTS, label } from '@/lib/utils/labels';
+import { CALL_STATUSES, INTERESTS, MOCK_TEST_STATUSES, label } from '@/lib/utils/labels';
 import type { Row } from '@/lib/types';
 import { CalendarDays, CheckCircle2, MapPin, Phone, PhoneCall, PhoneOff, Star, UserRound, XCircle } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export default async function Calls({ searchParams }: { searchParams: Promise<Re
   const page = Math.max(1, Number(sp.page) || 1);
   const supabase = await createClient();
   let q = supabase.from('call_logs')
-    .select('id, student_id, call_status, interest_status, exam_applications, admit_card_downloaded, interested_oav, notes, created_at, students!inner(student_name, phone_number, blocks(name)), profiles!call_logs_called_by_fkey(full_name)', { count: 'exact' })
+    .select('id, student_id, call_status, interest_status, exam_applications, admit_card_downloaded, interested_oav, mock_test_status, notes, created_at, students!inner(student_name, phone_number, blocks(name)), profiles!call_logs_called_by_fkey(full_name)', { count: 'exact' })
     .order('created_at', { ascending: false }).range((page - 1) * PAGE, page * PAGE - 1);
   const term = (sp.q ?? '').replace(/[,()%*\\]/g, ' ').trim();
   if (term) q = q.or(`student_name.ilike.%${term}%,phone_number.ilike.%${term}%`, { referencedTable: 'students' });
@@ -83,6 +83,7 @@ export default async function Calls({ searchParams }: { searchParams: Promise<Re
                   {Array.isArray(c.exam_applications) && c.exam_applications.length > 0 && <p className="mt-2 text-sm text-neutral-700">Applied for: {c.exam_applications.map((exam: string) => exam === 'none' ? 'None of these' : exam.toUpperCase()).join(', ')}</p>}
                   {c.admit_card_downloaded !== null && c.admit_card_downloaded !== undefined && <p className="mt-1 text-sm text-neutral-700">JNV admit card downloaded: {c.admit_card_downloaded ? 'Yes' : 'No'}</p>}
                   {c.interested_oav !== null && c.interested_oav !== undefined && <p className="mt-1 text-sm text-neutral-700">Interested in OAV: {c.interested_oav ? 'Yes' : 'No'}</p>}
+                  {c.mock_test_status && <p className="mt-1 text-sm text-neutral-700">Mock test status: {label(MOCK_TEST_STATUSES, c.mock_test_status)}</p>}
                   {c.notes && <div className="mt-3 whitespace-pre-wrap rounded-xl bg-[#fbfaf6] px-3 py-2 text-sm leading-5 text-neutral-700"><span className="font-medium text-neutral-800">Notes:</span> {c.notes}</div>}
                 </div>
               </div>

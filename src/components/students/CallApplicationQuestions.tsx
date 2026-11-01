@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { MOCK_TEST_STATUSES } from '@/lib/utils/labels';
 
 const exams = [
   { value: 'jnv', label: 'JNV' },
@@ -8,7 +9,7 @@ const exams = [
   { value: 'none', label: 'None of these' },
 ];
 
-function YesNoQuestion({ name, label }: { name: string; label: string }) {
+function YesNoQuestion({ name, label, initialValue }: { name: string; label: string; initialValue?: boolean | null }) {
   return (
     <fieldset>
       <legend className="text-sm font-medium text-[#26274e]">{label}</legend>
@@ -19,6 +20,7 @@ function YesNoQuestion({ name, label }: { name: string; label: string }) {
               type="radio"
               name={name}
               value={answer}
+              defaultChecked={initialValue === (answer === 'yes')}
               className="h-4 w-4 accent-[#171957]"
             />
             {answer === 'yes' ? 'Yes' : 'No'}
@@ -29,18 +31,34 @@ function YesNoQuestion({ name, label }: { name: string; label: string }) {
   );
 }
 
-export default function CallApplicationQuestions() {
-  const [selectedExams, setSelectedExams] = useState<string[]>([]);
+type CallApplicationQuestionsProps = {
+  initialExamApplications?: string[];
+  initialAdmitCardDownloaded?: boolean | null;
+  initialInterestedOav?: boolean | null;
+  initialMockTestStatus?: string | null;
+  idPrefix?: string;
+};
+
+export default function CallApplicationQuestions({
+  initialExamApplications = [],
+  initialAdmitCardDownloaded = null,
+  initialInterestedOav = null,
+  initialMockTestStatus = null,
+  idPrefix = '',
+}: CallApplicationQuestionsProps = {}) {
+  const [selectedExams, setSelectedExams] = useState<string[]>(initialExamApplications);
+  const [mockTestStatus, setMockTestStatus] = useState(initialMockTestStatus ?? '');
   const hasJnv = selectedExams.includes('jnv');
+  const hasMockTestApplication = selectedExams.includes('jnv') || selectedExams.includes('oav');
 
   function toggleExam(value: string) {
-    setSelectedExams((current) => {
-      if (value === 'none') return current.includes('none') ? [] : ['none'];
-      const examsOnly = current.filter((exam) => exam !== 'none');
-      return examsOnly.includes(value)
-        ? examsOnly.filter((exam) => exam !== value)
-        : [...examsOnly, value];
-    });
+    const nextExams = value === 'none'
+      ? selectedExams.includes('none') ? [] : ['none']
+      : selectedExams.includes(value)
+        ? selectedExams.filter((exam) => exam !== value)
+        : [...selectedExams.filter((exam) => exam !== 'none'), value];
+    setSelectedExams(nextExams);
+    if (!nextExams.includes('jnv') && !nextExams.includes('oav')) setMockTestStatus('');
   }
 
   return (
@@ -67,11 +85,28 @@ export default function CallApplicationQuestions() {
         <YesNoQuestion
           name="admit_card_downloaded"
           label="Has the student downloaded the JNV admit card?"
+          initialValue={initialAdmitCardDownloaded}
         />
       )}
+      <div>
+        <label className="label" htmlFor={`${idPrefix}mock_test_status`}>Mock test status</label>
+        <select
+          id={`${idPrefix}mock_test_status`}
+          name="mock_test_status"
+          value={hasMockTestApplication ? mockTestStatus : ''}
+          onChange={(event) => setMockTestStatus(event.target.value)}
+          disabled={!hasMockTestApplication}
+          className="input disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
+        >
+          <option value="">Select a mock test status</option>
+          {MOCK_TEST_STATUSES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+        </select>
+        {!hasMockTestApplication && <p className="mt-1 text-xs text-neutral-500">Select JNV or OAV above to enable this field.</p>}
+      </div>
       <YesNoQuestion
         name="interested_oav"
         label="Is the student interested in applying for OAV?"
+        initialValue={initialInterestedOav}
       />
     </section>
   );

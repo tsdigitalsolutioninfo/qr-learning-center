@@ -7,7 +7,7 @@ import { requireAdmin, requireProfile } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { normalizePhone } from '@/lib/utils/phone';
 import { istInputToIso } from '@/lib/utils/ist';
-import { callValues, interestValues, fail } from '@/lib/utils/labels';
+import { callValues, interestValues, mockTestValues, fail } from '@/lib/utils/labels';
 
 const opt = z.string().trim().max(200).optional().transform((v) => v || null);
 const studentSchema = z.object({
@@ -233,10 +233,15 @@ const callSchema = z.object({
   exam_applications: z.array(z.enum(['jnv', 'oav', 'none'])).max(2).refine((values) => new Set(values).size === values.length && (!values.includes('none') || values.length === 1)),
   admit_card_downloaded: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
   interested_oav: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  mock_test_status: z.preprocess((value) => value === '' ? undefined : value, z.enum(mockTestValues).optional())
+    .transform((value) => value ?? null),
   notes: z.string().trim().max(2000).optional().transform((v) => v || null), follow_up_at: z.string().optional(),
 }).superRefine((data, context) => {
   if (!data.exam_applications.includes('jnv') && data.admit_card_downloaded !== null) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ['admit_card_downloaded'], message: 'JNV application is required.' });
+  }
+  if (data.mock_test_status && !data.exam_applications.some((exam) => exam === 'jnv' || exam === 'oav')) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['mock_test_status'], message: 'JNV or OAV application is required.' });
   }
 });
 export async function recordCall(formData: FormData) {
@@ -260,6 +265,7 @@ export async function recordCall(formData: FormData) {
     exam_applications: d.exam_applications.length ? d.exam_applications : null,
     admit_card_downloaded: d.admit_card_downloaded,
     interested_oav: d.interested_oav,
+    mock_test_status: d.mock_test_status,
     follow_up_required: required, follow_up_at: followUp, request_id: d.request_id, call_started_at: null,
   });
   // 23505 = same request_id already saved (double submit): treat as success without duplicating.
@@ -269,4 +275,88 @@ export async function recordCall(formData: FormData) {
   }
   revalidatePath('/dashboard');
   redirect(`/students/${d.student_id}?saved=1`);
+}
+
+const callLogUpdateSchema = z.object({
+  id: z.string().uuid(),
+  student_id: z.string().uuid(),
+  call_status: z.enum(callValues),
+  interest_status: z.enum(interestValues),
+  exam_applications: z.array(z.enum(['jnv', 'oav', 'none'])).max(2)
+    .refine((values) => new Set(values).size === values.length && (!values.includes('none') || values.length === 1)),
+  admit_card_downloaded: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  interested_oav: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  mock_test_status: z.preprocess((value) => value === '' ? undefined : value, z.enum(mockTestValues).optional())
+    .transform((value) => value ?? null),
+  notes: z.string().trim().max(2000).optional().transform((value) => value || null),
+  follow_up_at: z.string().optional(),
+}).superRefine((data, context) => {
+  if (!data.exam_applications.includes('jnv') && data.admit_card_downloaded !== null) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['admit_card_downloaded'], message: 'JNV application is required.' });
+  }
+  if (data.mock_test_status && !data.exam_applications.some((exam) => exam === 'jnv' || exam === 'oav')) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['mock_test_status'], message: 'JNV or OAV application is required.' });
+  }
+});
+
+export async function updateCallLog(formData: FormData) {
+  await requireProfile();
+  const studentId = z.string().uuid().safeParse(formData.get('student_id'));
+  if (!studentId.success) return fail('/students', 'Invalid student.');
+  const back = `/students/${studentId.data}`;
+  const parsed = callLogUpdateSchema.safeParse({
+    ...Object.fromEntries(formData),
+    exam_applications: formData.getAll('exam_applications'),
+  });
+  if (!parsed.success) return fail(back, 'Please check the call details.');
+
+  const required = formData.get('follow_up_required') === 'on';
+  const followUp = required ? istInputToIso(parsed.data.follow_up_at ?? '') : null;
+  if (required && !followUp) return fail(back, 'Choose a valid follow-up date and time.');
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('call_logs').update({
+    call_status: parsed.data.call_status,
+    interest_status: parsed.data.interest_status,
+    exam_applications: parsed.data.exam_applications.length ? parsed.data.exam_applications : null,
+    admit_card_downloaded: parsed.data.admit_card_downloaded,
+    interested_oav: parsed.data.interested_oav,
+    mock_test_status: parsed.data.mock_test_status,
+    notes: parsed.data.notes,
+    follow_up_required: required,
+    follow_up_at: followUp,
+  }).eq('id', parsed.data.id).eq('student_id', studentId.data).select('id').maybeSingle();
+  if (error || !data) {
+    if (error) console.error('updateCallLog', error.code);
+    return fail(back, error?.code === '42501' ? 'You do not have permission to edit this call.' : 'Could not update the call. It may have been removed or you may not have permission.');
+  }
+
+  revalidatePath(back);
+  revalidatePath('/calls');
+  revalidatePath('/follow-ups');
+  revalidatePath('/dashboard');
+  redirect(`${back}?saved=1`);
+}
+
+export async function deleteCallLog(formData: FormData) {
+  await requireProfile();
+  const studentId = z.string().uuid().safeParse(formData.get('student_id'));
+  const callId = z.string().uuid().safeParse(formData.get('id'));
+  if (!studentId.success) return fail('/students', 'Invalid student.');
+  const back = `/students/${studentId.data}`;
+  if (!callId.success) return fail(back, 'Invalid call history entry.');
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('call_logs').delete()
+    .eq('id', callId.data).eq('student_id', studentId.data).select('id').maybeSingle();
+  if (error || !data) {
+    if (error) console.error('deleteCallLog', error.code);
+    return fail(back, error?.code === '42501' ? 'You do not have permission to delete this call.' : 'Could not delete the call. It may have been removed or you may not have permission.');
+  }
+
+  revalidatePath(back);
+  revalidatePath('/calls');
+  revalidatePath('/follow-ups');
+  revalidatePath('/dashboard');
+  redirect(`${back}?saved=1`);
 }

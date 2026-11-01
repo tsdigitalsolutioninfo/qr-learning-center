@@ -7,6 +7,11 @@ export function istDayRange(offsetDays = 0) {
 }
 export const fmt = (iso?: string | null) =>
   iso ? new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'medium', timeStyle: 'short' }) : '—';
+export function isoToIstInput(iso?: string | null) {
+  if (!iso) return '';
+  const date = new Date(iso);
+  return isNaN(date.getTime()) ? '' : new Date(date.getTime() + IST_MS).toISOString().slice(0, 16);
+}
 /** Converts a <input type="datetime-local"> value (interpreted as IST) to an ISO string, or null if invalid. */
 export function istInputToIso(v: string): string | null {
   const d = new Date(`${v}:00+05:30`);

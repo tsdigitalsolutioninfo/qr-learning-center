@@ -270,3 +270,81 @@ export async function recordCall(formData: FormData) {
   revalidatePath('/dashboard');
   redirect(`/students/${d.student_id}?saved=1`);
 }
+
+const callLogUpdateSchema = z.object({
+  id: z.string().uuid(),
+  student_id: z.string().uuid(),
+  call_status: z.enum(callValues),
+  interest_status: z.enum(interestValues),
+  exam_applications: z.array(z.enum(['jnv', 'oav', 'none'])).max(2)
+    .refine((values) => new Set(values).size === values.length && (!values.includes('none') || values.length === 1)),
+  admit_card_downloaded: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  interested_oav: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  notes: z.string().trim().max(2000).optional().transform((value) => value || null),
+  follow_up_at: z.string().optional(),
+}).superRefine((data, context) => {
+  if (!data.exam_applications.includes('jnv') && data.admit_card_downloaded !== null) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['admit_card_downloaded'], message: 'JNV application is required.' });
+  }
+});
+
+export async function updateCallLog(formData: FormData) {
+  await requireProfile();
+  const studentId = z.string().uuid().safeParse(formData.get('student_id'));
+  if (!studentId.success) return fail('/students', 'Invalid student.');
+  const back = `/students/${studentId.data}`;
+  const parsed = callLogUpdateSchema.safeParse({
+    ...Object.fromEntries(formData),
+    exam_applications: formData.getAll('exam_applications'),
+  });
+  if (!parsed.success) return fail(back, 'Please check the call details.');
+
+  const required = formData.get('follow_up_required') === 'on';
+  const followUp = required ? istInputToIso(parsed.data.follow_up_at ?? '') : null;
+  if (required && !followUp) return fail(back, 'Choose a valid follow-up date and time.');
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('call_logs').update({
+    call_status: parsed.data.call_status,
+    interest_status: parsed.data.interest_status,
+    exam_applications: parsed.data.exam_applications.length ? parsed.data.exam_applications : null,
+    admit_card_downloaded: parsed.data.admit_card_downloaded,
+    interested_oav: parsed.data.interested_oav,
+    notes: parsed.data.notes,
+    follow_up_required: required,
+    follow_up_at: followUp,
+  }).eq('id', parsed.data.id).eq('student_id', studentId.data).select('id').maybeSingle();
+  if (error || !data) {
+    if (error) console.error('updateCallLog', error.code);
+    return fail(back, error?.code === '42501' ? 'You do not have permission to edit this call.' : 'Could not update the call. It may have been removed or you may not have permission.');
+  }
+
+  revalidatePath(back);
+  revalidatePath('/calls');
+  revalidatePath('/follow-ups');
+  revalidatePath('/dashboard');
+  redirect(`${back}?saved=1`);
+}
+
+export async function deleteCallLog(formData: FormData) {
+  await requireProfile();
+  const studentId = z.string().uuid().safeParse(formData.get('student_id'));
+  const callId = z.string().uuid().safeParse(formData.get('id'));
+  if (!studentId.success) return fail('/students', 'Invalid student.');
+  const back = `/students/${studentId.data}`;
+  if (!callId.success) return fail(back, 'Invalid call history entry.');
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.from('call_logs').delete()
+    .eq('id', callId.data).eq('student_id', studentId.data).select('id').maybeSingle();
+  if (error || !data) {
+    if (error) console.error('deleteCallLog', error.code);
+    return fail(back, error?.code === '42501' ? 'You do not have permission to delete this call.' : 'Could not delete the call. It may have been removed or you may not have permission.');
+  }
+
+  revalidatePath(back);
+  revalidatePath('/calls');
+  revalidatePath('/follow-ups');
+  revalidatePath('/dashboard');
+  redirect(`${back}?saved=1`);
+}

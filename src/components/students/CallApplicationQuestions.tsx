@@ -8,7 +8,7 @@ const exams = [
   { value: 'none', label: 'None of these' },
 ];
 
-function YesNoQuestion({ name, label }: { name: string; label: string }) {
+function YesNoQuestion({ name, label, initialValue }: { name: string; label: string; initialValue?: boolean | null }) {
   return (
     <fieldset>
       <legend className="text-sm font-medium text-[#26274e]">{label}</legend>
@@ -19,6 +19,7 @@ function YesNoQuestion({ name, label }: { name: string; label: string }) {
               type="radio"
               name={name}
               value={answer}
+              defaultChecked={initialValue === (answer === 'yes')}
               className="h-4 w-4 accent-[#171957]"
             />
             {answer === 'yes' ? 'Yes' : 'No'}
@@ -29,8 +30,18 @@ function YesNoQuestion({ name, label }: { name: string; label: string }) {
   );
 }
 
-export default function CallApplicationQuestions() {
-  const [selectedExams, setSelectedExams] = useState<string[]>([]);
+type CallApplicationQuestionsProps = {
+  initialExamApplications?: string[];
+  initialAdmitCardDownloaded?: boolean | null;
+  initialInterestedOav?: boolean | null;
+};
+
+export default function CallApplicationQuestions({
+  initialExamApplications = [],
+  initialAdmitCardDownloaded = null,
+  initialInterestedOav = null,
+}: CallApplicationQuestionsProps = {}) {
+  const [selectedExams, setSelectedExams] = useState<string[]>(initialExamApplications);
   const hasJnv = selectedExams.includes('jnv');
 
   function toggleExam(value: string) {
@@ -67,11 +78,13 @@ export default function CallApplicationQuestions() {
         <YesNoQuestion
           name="admit_card_downloaded"
           label="Has the student downloaded the JNV admit card?"
+          initialValue={initialAdmitCardDownloaded}
         />
       )}
       <YesNoQuestion
         name="interested_oav"
         label="Is the student interested in applying for OAV?"
+        initialValue={initialInterestedOav}
       />
     </section>
   );

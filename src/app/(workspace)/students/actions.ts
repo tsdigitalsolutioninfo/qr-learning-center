@@ -7,7 +7,7 @@ import { requireAdmin, requireProfile } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { normalizePhone } from '@/lib/utils/phone';
 import { istInputToIso } from '@/lib/utils/ist';
-import { callValues, interestValues, fail } from '@/lib/utils/labels';
+import { callValues, interestValues, mockTestValues, fail } from '@/lib/utils/labels';
 
 const opt = z.string().trim().max(200).optional().transform((v) => v || null);
 const studentSchema = z.object({
@@ -233,10 +233,15 @@ const callSchema = z.object({
   exam_applications: z.array(z.enum(['jnv', 'oav', 'none'])).max(2).refine((values) => new Set(values).size === values.length && (!values.includes('none') || values.length === 1)),
   admit_card_downloaded: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
   interested_oav: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  mock_test_status: z.preprocess((value) => value === '' ? undefined : value, z.enum(mockTestValues).optional())
+    .transform((value) => value ?? null),
   notes: z.string().trim().max(2000).optional().transform((v) => v || null), follow_up_at: z.string().optional(),
 }).superRefine((data, context) => {
   if (!data.exam_applications.includes('jnv') && data.admit_card_downloaded !== null) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ['admit_card_downloaded'], message: 'JNV application is required.' });
+  }
+  if (data.mock_test_status && !data.exam_applications.some((exam) => exam === 'jnv' || exam === 'oav')) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['mock_test_status'], message: 'JNV or OAV application is required.' });
   }
 });
 export async function recordCall(formData: FormData) {
@@ -260,6 +265,7 @@ export async function recordCall(formData: FormData) {
     exam_applications: d.exam_applications.length ? d.exam_applications : null,
     admit_card_downloaded: d.admit_card_downloaded,
     interested_oav: d.interested_oav,
+    mock_test_status: d.mock_test_status,
     follow_up_required: required, follow_up_at: followUp, request_id: d.request_id, call_started_at: null,
   });
   // 23505 = same request_id already saved (double submit): treat as success without duplicating.
@@ -280,11 +286,16 @@ const callLogUpdateSchema = z.object({
     .refine((values) => new Set(values).size === values.length && (!values.includes('none') || values.length === 1)),
   admit_card_downloaded: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
   interested_oav: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  mock_test_status: z.preprocess((value) => value === '' ? undefined : value, z.enum(mockTestValues).optional())
+    .transform((value) => value ?? null),
   notes: z.string().trim().max(2000).optional().transform((value) => value || null),
   follow_up_at: z.string().optional(),
 }).superRefine((data, context) => {
   if (!data.exam_applications.includes('jnv') && data.admit_card_downloaded !== null) {
     context.addIssue({ code: z.ZodIssueCode.custom, path: ['admit_card_downloaded'], message: 'JNV application is required.' });
+  }
+  if (data.mock_test_status && !data.exam_applications.some((exam) => exam === 'jnv' || exam === 'oav')) {
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['mock_test_status'], message: 'JNV or OAV application is required.' });
   }
 });
 
@@ -310,6 +321,7 @@ export async function updateCallLog(formData: FormData) {
     exam_applications: parsed.data.exam_applications.length ? parsed.data.exam_applications : null,
     admit_card_downloaded: parsed.data.admit_card_downloaded,
     interested_oav: parsed.data.interested_oav,
+    mock_test_status: parsed.data.mock_test_status,
     notes: parsed.data.notes,
     follow_up_required: required,
     follow_up_at: followUp,

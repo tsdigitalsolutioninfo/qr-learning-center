@@ -6,7 +6,7 @@ import { requireProfile } from '@/lib/auth/session';
 import { createClient } from '@/lib/supabase/server';
 import { fmt } from '@/lib/utils/ist';
 import { telHref } from '@/lib/utils/phone';
-import { CALL_STATUSES, INTERESTS, label } from '@/lib/utils/labels';
+import { CALL_STATUSES, INTERESTS, MOCK_TEST_STATUSES, label } from '@/lib/utils/labels';
 import type { Row } from '@/lib/types';
 import { ClipboardList, Phone } from 'lucide-react';
 import CallHistoryActions from '@/components/students/CallHistoryActions';
@@ -22,7 +22,7 @@ export default async function StudentProfile({ params, searchParams }: { params:
     .select('*, districts(name), blocks(name)').eq('id', id).maybeSingle();
   if (!s) notFound();
   const [{ data: calls }, { data: fups }] = await Promise.all([
-    supabase.from('call_logs').select('id, call_status, interest_status, exam_applications, admit_card_downloaded, interested_oav, notes, follow_up_required, follow_up_at, created_at, profiles!call_logs_called_by_fkey(full_name)').eq('student_id', id).order('created_at', { ascending: false }).limit(50),
+    supabase.from('call_logs').select('id, call_status, interest_status, exam_applications, admit_card_downloaded, interested_oav, mock_test_status, notes, follow_up_required, follow_up_at, created_at, profiles!call_logs_called_by_fkey(full_name)').eq('student_id', id).order('created_at', { ascending: false }).limit(50),
     supabase.from('follow_ups').select('id, due_at, status, completed_at').eq('student_id', id).order('due_at', { ascending: false }).limit(20),
   ]);
   const r = s as Row;
@@ -63,7 +63,24 @@ export default async function StudentProfile({ params, searchParams }: { params:
         <section className="!mt-0 overflow-hidden rounded-2xl border border-[#e9e4cf] bg-white shadow-[0_8px_24px_-20px_rgba(23,25,87,.25)]">
           <div className="flex items-center justify-between gap-2 border-b border-[#eeeadd] px-4 py-3.5 sm:px-5 sm:py-4"><div className="min-w-0"><h2 className="!mb-0 text-base font-semibold text-[#171957]">Call history</h2><p className="mt-1 text-xs text-neutral-500">Recent conversations and outcomes</p></div><span className="shrink-0 rounded-full bg-[#f4f2ea] px-2.5 py-1 text-xs font-medium text-neutral-600">{calls?.length ?? 0}</span></div>
           {!calls?.length ? <p className="px-5 py-8 text-center text-sm text-neutral-500">No calls have been recorded yet.</p> : <ul className="divide-y divide-[#f0eee7]">
-            {(calls as Row[]).map((c) => <li key={c.id} className="px-5 py-4"><div className="flex items-center justify-between gap-2"><div className="flex min-w-0 flex-wrap items-center gap-2"><span className="text-sm font-semibold text-[#26274e]">{label(CALL_STATUSES, c.call_status)}</span><span className="badge">{label(INTERESTS, c.interest_status)}</span></div><CallHistoryActions call={c} studentId={id} /></div><p className="mt-1.5 text-xs text-neutral-500">{fmt(c.created_at)}{c.profiles?.full_name ? ` · ${c.profiles.full_name}` : ''}</p>{Array.isArray(c.exam_applications) && c.exam_applications.length > 0 && <p className="mt-2 text-sm text-neutral-700">Applied for: {c.exam_applications.map((exam: string) => exam === 'none' ? 'None of these' : exam.toUpperCase()).join(', ')}</p>}{c.admit_card_downloaded !== null && c.admit_card_downloaded !== undefined && <p className="mt-1 text-sm text-neutral-700">JNV admit card downloaded: {c.admit_card_downloaded ? 'Yes' : 'No'}</p>}{c.interested_oav !== null && c.interested_oav !== undefined && <p className="mt-1 text-sm text-neutral-700">Interested in OAV: {c.interested_oav ? 'Yes' : 'No'}</p>}{c.follow_up_at && <p className="mt-1 text-xs text-[#66520d]">Follow-up: {fmt(c.follow_up_at)}</p>}{c.notes && <p className="mt-2 whitespace-pre-wrap text-sm leading-5 text-neutral-700">{c.notes}</p>}</li>)}
+            {(calls as Row[]).map((c) => (
+              <li key={c.id} className="px-5 py-4">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-[#26274e]">{label(CALL_STATUSES, c.call_status)}</span>
+                    <span className="badge">{label(INTERESTS, c.interest_status)}</span>
+                  </div>
+                  <CallHistoryActions call={c} studentId={id} />
+                </div>
+                <p className="mt-1.5 text-xs text-neutral-500">{fmt(c.created_at)}{c.profiles?.full_name ? ` · ${c.profiles.full_name}` : ''}</p>
+                {Array.isArray(c.exam_applications) && c.exam_applications.length > 0 && <p className="mt-2 text-sm text-neutral-700">Applied for: {c.exam_applications.map((exam: string) => exam === 'none' ? 'None of these' : exam.toUpperCase()).join(', ')}</p>}
+                {c.admit_card_downloaded !== null && c.admit_card_downloaded !== undefined && <p className="mt-1 text-sm text-neutral-700">JNV admit card downloaded: {c.admit_card_downloaded ? 'Yes' : 'No'}</p>}
+                {c.interested_oav !== null && c.interested_oav !== undefined && <p className="mt-1 text-sm text-neutral-700">Interested in OAV: {c.interested_oav ? 'Yes' : 'No'}</p>}
+                {c.mock_test_status && <p className="mt-1 text-sm text-neutral-700">Mock test status: {label(MOCK_TEST_STATUSES, c.mock_test_status)}</p>}
+                {c.follow_up_at && <p className="mt-1 text-xs text-[#66520d]">Follow-up: {fmt(c.follow_up_at)}</p>}
+                {c.notes && <p className="mt-2 whitespace-pre-wrap text-sm leading-5 text-neutral-700">{c.notes}</p>}
+              </li>
+            ))}
           </ul>}
         </section>
 

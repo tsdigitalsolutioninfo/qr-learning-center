@@ -92,6 +92,8 @@ export default function CallHistoryActions({ call, studentId }: { call: Row; stu
                   initialExamApplications={Array.isArray(call.exam_applications) ? call.exam_applications : []}
                   initialAdmitCardDownloaded={call.admit_card_downloaded}
                   initialInterestedOav={call.interested_oav}
+                  initialMockTestStatus={call.mock_test_status}
+                  idPrefix={`${call.id}-`}
                 />
                 <div>
                   <label className="label" htmlFor={`call-notes-${call.id}`}>Conversation notes</label>

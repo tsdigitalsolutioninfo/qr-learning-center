@@ -59,14 +59,20 @@ const CS_NAV = [
   { href: '/follow-ups', label: 'Follow-ups', icon: ClipboardList },
 ];
 
-export default function AppShell({ profile, title, children }: { profile: Profile; title?: string; children: React.ReactNode }) {
+const GUEST_NAV = [
+  { href: '/', label: 'Home', icon: LayoutDashboard },
+  { href: '/call-status/ai-agent/jnv', label: 'JNV Call Status', icon: Phone },
+];
+
+export default function AppShell({ profile, title, guest = false, children }: { profile?: Profile; title?: string; guest?: boolean; children: React.ReactNode }) {
   const pathname = usePathname();
   const alreadyRendered = useContext(ShellAlreadyRendered);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const nav = profile.role === 'admin' ? ADMIN_NAV : CS_NAV;
-  const pageTitle = title ?? titleForPath(pathname, profile.role);
+  const nav = guest ? GUEST_NAV : profile?.role === 'admin' ? ADMIN_NAV : CS_NAV;
+  const role = profile?.role ?? 'block_correspondence';
+  const pageTitle = title ?? titleForPath(pathname, role);
 
   useEffect(() => {
     if (alreadyRendered) return;
@@ -179,7 +185,7 @@ export default function AppShell({ profile, title, children }: { profile: Profil
           </button>
         </div>
         <div className="px-4 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/50">
-          <span className={collapsed ? 'sr-only' : ''}>Workspace</span>
+          <span className={collapsed ? 'sr-only' : ''}>{guest ? 'Public' : 'Workspace'}</span>
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-2 pb-4" aria-label="Main navigation">{links}</nav>
         <div className="border-t border-white/10 px-4 py-4 text-[11px] text-white/55">
@@ -206,18 +212,30 @@ export default function AppShell({ profile, title, children }: { profile: Profil
           </div>}
           </div>
           <div className="relative flex shrink-0 items-center gap-3">
-            <div className="hidden min-w-0 text-right sm:block">
-              <p className="max-w-56 truncate text-sm font-semibold text-[#17172b]">{profile.full_name}</p>
-              <p className="text-xs text-neutral-500">{profile.role === 'admin' ? 'Administrator workspace' : 'Block correspondence workspace'}</p>
-            </div>
-            <button type="button" onClick={() => setProfileMenuOpen((open) => !open)} aria-label="Open profile menu" aria-haspopup="menu" aria-expanded={profileMenuOpen}
-              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e9e4cf] bg-[#fbf5dc] text-[#171957] transition hover:bg-[#f5edc8] focus:outline-none focus:ring-4 focus:ring-[#171957]/10">
-              <UserRound aria-hidden="true" size={19} />
-            </button>
-            {profileMenuOpen && <>
+            {guest ? (
+              <>
+                <div className="hidden min-w-0 text-right sm:block">
+                  <p className="text-sm font-semibold text-[#17172b]">Guest access</p>
+                  <p className="text-xs text-neutral-500">Public information</p>
+                </div>
+                <Link href="/login" className="inline-flex min-h-10 items-center rounded-full bg-[#d3b13b] px-4 text-sm font-semibold text-[#171957] hover:bg-[#e0c65c]">Staff login</Link>
+              </>
+            ) : (
+              <>
+                <div className="hidden min-w-0 text-right sm:block">
+                  <p className="max-w-56 truncate text-sm font-semibold text-[#17172b]">{profile?.full_name}</p>
+                  <p className="text-xs text-neutral-500">{profile?.role === 'admin' ? 'Administrator workspace' : 'Block correspondence workspace'}</p>
+                </div>
+                <button type="button" onClick={() => setProfileMenuOpen((open) => !open)} aria-label="Open profile menu" aria-haspopup="menu" aria-expanded={profileMenuOpen}
+                  className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e9e4cf] bg-[#fbf5dc] text-[#171957] transition hover:bg-[#f5edc8] focus:outline-none focus:ring-4 focus:ring-[#171957]/10">
+                  <UserRound aria-hidden="true" size={19} />
+                </button>
+              </>
+            )}
+            {!guest && profileMenuOpen && <>
               <button type="button" aria-label="Close profile menu" className="fixed inset-0 z-30 cursor-default" onClick={() => setProfileMenuOpen(false)} />
               <div role="menu" aria-label="Profile options" className="absolute right-0 top-full z-40 mt-3 w-64 overflow-hidden rounded-2xl border border-[#e9e4cf] bg-white p-1.5 shadow-[0_18px_45px_-20px_rgba(23,25,87,.35)]">
-                <div className="border-b border-[#eeeadd] px-3 py-3 sm:hidden"><p className="truncate text-sm font-semibold text-[#17172b]">{profile.full_name}</p><p className="mt-0.5 text-xs text-neutral-500">{profile.role === 'admin' ? 'Administrator workspace' : 'Block correspondence workspace'}</p></div>
+                <div className="border-b border-[#eeeadd] px-3 py-3 sm:hidden"><p className="truncate text-sm font-semibold text-[#17172b]">{profile?.full_name}</p><p className="mt-0.5 text-xs text-neutral-500">{profile?.role === 'admin' ? 'Administrator workspace' : 'Block correspondence workspace'}</p></div>
                 <Link role="menuitem" href="/settings" onClick={() => setProfileMenuOpen(false)} className="flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-[#26274e] hover:bg-[#fbfaf6]"><Settings aria-hidden="true" size={17} className="text-neutral-500" /> Settings</Link>
                 <form action={signOut}>
                   <button role="menuitem" className="flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium text-rose-700 hover:bg-rose-50"><LogOut aria-hidden="true" size={17} /> Log out</button>
@@ -238,7 +256,7 @@ export default function AppShell({ profile, title, children }: { profile: Profil
               <X aria-hidden="true" size={19} />
             </button>
           </div>
-          <p className="px-5 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">Workspace</p>
+          <p className="px-5 pb-2 pt-6 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/45">{guest ? 'Public' : 'Workspace'}</p>
           <nav className="flex flex-1 flex-col gap-1.5 px-3" aria-label="Mobile navigation">
           {nav.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(`${href}/`));
@@ -252,8 +270,17 @@ export default function AppShell({ profile, title, children }: { profile: Profil
           })}
           </nav>
           <div className="border-t border-white/10 px-4 py-4">
-            <p className="truncate text-sm font-medium text-white">{profile.full_name}</p>
-            <p className="mt-1 text-xs text-white/50">{profile.role === 'admin' ? 'Administrator' : 'Block correspondence'}</p>
+            {guest ? (
+              <>
+                <p className="truncate text-sm font-medium text-white">Guest access</p>
+                <Link href="/login" className="mt-2 inline-flex text-xs font-medium text-[#ead37a] hover:text-white">Staff login</Link>
+              </>
+            ) : (
+              <>
+                <p className="truncate text-sm font-medium text-white">{profile?.full_name}</p>
+                <p className="mt-1 text-xs text-white/50">{profile?.role === 'admin' ? 'Administrator' : 'Block correspondence'}</p>
+              </>
+            )}
           </div>
         </aside>
         <main className="mx-auto w-full max-w-7xl p-4 md:px-8 md:py-8">
@@ -262,7 +289,7 @@ export default function AppShell({ profile, title, children }: { profile: Profil
               <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#8a711d] sm:text-[11px] sm:tracking-[0.18em]">QR Learning Center | Deogarh</p>
               <h1 className="text-xl font-semibold tracking-tight text-[#171957] sm:text-2xl md:text-[1.75rem]">{pageTitle}</h1>
             </div>
-            {pathname === '/districts' && profile.role === 'admin' ? <AddDistrictModal /> : pathname === '/blocks' && profile.role === 'admin' ? <AddBlockModal /> : pathname === '/users' && profile.role === 'admin' ? <Link href="/users/create" className="btn shrink-0 px-3">Create user</Link> : (pathname === '/students' && profile.role === 'admin' && (
+            {pathname === '/districts' && profile?.role === 'admin' ? <AddDistrictModal /> : pathname === '/blocks' && profile?.role === 'admin' ? <AddBlockModal /> : pathname === '/users' && profile?.role === 'admin' ? <Link href="/users/create" className="btn shrink-0 px-3">Create user</Link> : (pathname === '/students' && profile?.role === 'admin' && (
               <Link href="/students/new" className="btn shrink-0 px-3 sm:w-auto">Add student</Link>
             ))}
           </div>

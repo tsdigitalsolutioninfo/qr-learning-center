@@ -2,6 +2,8 @@ import { createServerClient, type SetAllCookies } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const PUBLIC = ['/login', '/unauthorized'];
+const PUBLIC_EXACT = new Set(['/call-status/ai-agent/jnv']);
+const PUBLIC_PREFIXES = ['/call-status/ai-agent/jnv/'];
 const PUBLIC_PWA_ASSETS = new Set(['/manifest.webmanifest', '/offline.html', '/sw.js']);
 
 export async function middleware(request: NextRequest) {
@@ -20,7 +22,8 @@ export async function middleware(request: NextRequest) {
     },
   });
   const { data: { user } } = await supabase.auth.getUser(); // refreshes expired sessions
-  if (!user && path !== '/' && !PUBLIC.some((p) => path.startsWith(p))) {
+  const isPublicRoute = PUBLIC_EXACT.has(path) || PUBLIC_PREFIXES.some((prefix) => path.startsWith(prefix));
+  if (!user && path !== '/' && !isPublicRoute && !PUBLIC.some((p) => path.startsWith(p))) {
     const url = request.nextUrl.clone(); url.pathname = '/login'; url.search = '';
     return NextResponse.redirect(url);
   }

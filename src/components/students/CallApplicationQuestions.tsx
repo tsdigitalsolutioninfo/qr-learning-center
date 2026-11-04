@@ -36,6 +36,8 @@ type CallApplicationQuestionsProps = {
   initialAdmitCardDownloaded?: boolean | null;
   initialInterestedOav?: boolean | null;
   initialMockTestStatus?: string | null;
+  initialPreviousMockTestAttended?: boolean | null;
+  initialNextMockTestReady?: boolean | null;
   idPrefix?: string;
 };
 
@@ -44,6 +46,8 @@ export default function CallApplicationQuestions({
   initialAdmitCardDownloaded = null,
   initialInterestedOav = null,
   initialMockTestStatus = null,
+  initialPreviousMockTestAttended = null,
+  initialNextMockTestReady = null,
   idPrefix = '',
 }: CallApplicationQuestionsProps = {}) {
   const [selectedExams, setSelectedExams] = useState<string[]>(initialExamApplications);
@@ -107,6 +111,16 @@ export default function CallApplicationQuestions({
         name="interested_oav"
         label="Is the student interested in applying for OAV?"
         initialValue={initialInterestedOav}
+      />
+      <YesNoQuestion
+        name="previous_mock_test_attended"
+        label="Has the student attended a previous mock test?"
+        initialValue={initialPreviousMockTestAttended}
+      />
+      <YesNoQuestion
+        name="next_mock_test_ready"
+        label="Is the student ready to attend the next mock test?"
+        initialValue={initialNextMockTestReady}
       />
     </section>
   );

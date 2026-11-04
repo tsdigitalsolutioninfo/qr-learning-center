@@ -233,6 +233,8 @@ const callSchema = z.object({
   exam_applications: z.array(z.enum(['jnv', 'oav', 'none'])).max(2).refine((values) => new Set(values).size === values.length && (!values.includes('none') || values.length === 1)),
   admit_card_downloaded: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
   interested_oav: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  previous_mock_test_attended: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  next_mock_test_ready: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
   mock_test_status: z.preprocess((value) => value === '' ? undefined : value, z.enum(mockTestValues).optional())
     .transform((value) => value ?? null),
   notes: z.string().trim().max(2000).optional().transform((v) => v || null), follow_up_at: z.string().optional(),
@@ -265,6 +267,8 @@ export async function recordCall(formData: FormData) {
     exam_applications: d.exam_applications.length ? d.exam_applications : null,
     admit_card_downloaded: d.admit_card_downloaded,
     interested_oav: d.interested_oav,
+    previous_mock_test_attended: d.previous_mock_test_attended,
+    next_mock_test_ready: d.next_mock_test_ready,
     mock_test_status: d.mock_test_status,
     follow_up_required: required, follow_up_at: followUp, request_id: d.request_id, call_started_at: null,
   });
@@ -286,6 +290,8 @@ const callLogUpdateSchema = z.object({
     .refine((values) => new Set(values).size === values.length && (!values.includes('none') || values.length === 1)),
   admit_card_downloaded: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
   interested_oav: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  previous_mock_test_attended: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
+  next_mock_test_ready: z.enum(['yes', 'no']).optional().transform((value) => value === undefined ? null : value === 'yes'),
   mock_test_status: z.preprocess((value) => value === '' ? undefined : value, z.enum(mockTestValues).optional())
     .transform((value) => value ?? null),
   notes: z.string().trim().max(2000).optional().transform((value) => value || null),
@@ -321,6 +327,8 @@ export async function updateCallLog(formData: FormData) {
     exam_applications: parsed.data.exam_applications.length ? parsed.data.exam_applications : null,
     admit_card_downloaded: parsed.data.admit_card_downloaded,
     interested_oav: parsed.data.interested_oav,
+    previous_mock_test_attended: parsed.data.previous_mock_test_attended,
+    next_mock_test_ready: parsed.data.next_mock_test_ready,
     mock_test_status: parsed.data.mock_test_status,
     notes: parsed.data.notes,
     follow_up_required: required,

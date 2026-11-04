@@ -93,6 +93,8 @@ export default function CallHistoryActions({ call, studentId }: { call: Row; stu
                   initialAdmitCardDownloaded={call.admit_card_downloaded}
                   initialInterestedOav={call.interested_oav}
                   initialMockTestStatus={call.mock_test_status}
+                  initialPreviousMockTestAttended={call.previous_mock_test_attended}
+                  initialNextMockTestReady={call.next_mock_test_ready}
                   idPrefix={`${call.id}-`}
                 />
                 <div>

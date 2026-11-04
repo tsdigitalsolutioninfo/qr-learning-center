@@ -22,7 +22,7 @@ export default async function StudentProfile({ params, searchParams }: { params:
     .select('*, districts(name), blocks(name)').eq('id', id).maybeSingle();
   if (!s) notFound();
   const [{ data: calls }, { data: fups }] = await Promise.all([
-    supabase.from('call_logs').select('id, call_status, interest_status, exam_applications, admit_card_downloaded, interested_oav, mock_test_status, notes, follow_up_required, follow_up_at, created_at, profiles!call_logs_called_by_fkey(full_name)').eq('student_id', id).order('created_at', { ascending: false }).limit(50),
+    supabase.from('call_logs').select('id, call_status, interest_status, exam_applications, admit_card_downloaded, interested_oav, previous_mock_test_attended, next_mock_test_ready, mock_test_status, notes, follow_up_required, follow_up_at, created_at, profiles!call_logs_called_by_fkey(full_name)').eq('student_id', id).order('created_at', { ascending: false }).limit(50),
     supabase.from('follow_ups').select('id, due_at, status, completed_at').eq('student_id', id).order('due_at', { ascending: false }).limit(20),
   ]);
   const r = s as Row;
@@ -76,6 +76,8 @@ export default async function StudentProfile({ params, searchParams }: { params:
                 {Array.isArray(c.exam_applications) && c.exam_applications.length > 0 && <p className="mt-2 text-sm text-neutral-700">Applied for: {c.exam_applications.map((exam: string) => exam === 'none' ? 'None of these' : exam.toUpperCase()).join(', ')}</p>}
                 {c.admit_card_downloaded !== null && c.admit_card_downloaded !== undefined && <p className="mt-1 text-sm text-neutral-700">JNV admit card downloaded: {c.admit_card_downloaded ? 'Yes' : 'No'}</p>}
                 {c.interested_oav !== null && c.interested_oav !== undefined && <p className="mt-1 text-sm text-neutral-700">Interested in OAV: {c.interested_oav ? 'Yes' : 'No'}</p>}
+                {c.previous_mock_test_attended !== null && c.previous_mock_test_attended !== undefined && <p className="mt-1 text-sm text-neutral-700">Attended a previous mock test: {c.previous_mock_test_attended ? 'Yes' : 'No'}</p>}
+                {c.next_mock_test_ready !== null && c.next_mock_test_ready !== undefined && <p className="mt-1 text-sm text-neutral-700">Ready to attend the next mock test: {c.next_mock_test_ready ? 'Yes' : 'No'}</p>}
                 {c.mock_test_status && <p className="mt-1 text-sm text-neutral-700">Mock test status: {label(MOCK_TEST_STATUSES, c.mock_test_status)}</p>}
                 {c.follow_up_at && <p className="mt-1 text-xs text-[#66520d]">Follow-up: {fmt(c.follow_up_at)}</p>}
                 {c.notes && <p className="mt-2 whitespace-pre-wrap text-sm leading-5 text-neutral-700">{c.notes}</p>}

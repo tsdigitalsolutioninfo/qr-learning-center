@@ -5,6 +5,8 @@ const PUBLIC = ['/login', '/unauthorized'];
 const PUBLIC_EXACT = new Set([
   '/call-status/ai-agent/jnv',
   '/mobile-app/admin/dashboard',
+  '/mobile-app/admin/create-correspondents',
+  '/mobile-app/admin/correspondents',
   '/mobile-app/login/admin-login',
   '/mobile-app/login/correspondant-login',
   '/mobile-app/correspondant/dashboard',

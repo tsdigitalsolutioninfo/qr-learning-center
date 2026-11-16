@@ -22,6 +22,14 @@ Forgotten password: an admin can reset it in the Supabase dashboard (Authenticat
 
 On success it returns the session tokens and admin profile, including `must_change_password`. Non-admin and inactive accounts are rejected.
 
+## Mobile correspondent management API
+All endpoints require an active admin's Supabase access token in `Authorization: Bearer <access_token>`.
+
+- `GET /mobile-app/admin/correspondents` returns all correspondent accounts, including each account's `is_active` status and block/district.
+- `PATCH /mobile-app/admin/correspondents` accepts a JSON body with `id` and one or more of `full_name`, `block_id`, or `is_active`. Block changes require an active block and update its district at the same time.
+- `DELETE /mobile-app/admin/correspondents?id=<uuid>` permanently deletes an account when no records refer to it. It returns `409` if linked records prevent deletion; deactivate the account instead to preserve history.
+- `POST /mobile-app/admin/create-correspondents` creates a correspondent from JSON fields `full_name`, `email`, `password`, and `block_id`; optional `is_active` defaults to `true`. New users must change their password at first login.
+
 ## Mobile call logging API
 `POST /mobile-app/correspondant/call-logs` records a call for any active student. Any signed-in account with an active profile can use it, including admins and correspondents from other blocks. Send the Supabase access token as `Authorization: Bearer <access_token>` and a JSON body:
 

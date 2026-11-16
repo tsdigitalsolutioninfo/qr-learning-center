@@ -6,6 +6,7 @@ const PUBLIC_EXACT = new Set([
   '/call-status/ai-agent/jnv',
   '/mobile-app/login/correspondant-login',
   '/mobile-app/correspondant/dashboard',
+  '/mobile-app/correspondant/students',
 ]);
 const PUBLIC_PREFIXES = ['/call-status/ai-agent/jnv/'];
 const PUBLIC_PWA_ASSETS = new Set(['/manifest.webmanifest', '/offline.html', '/sw.js']);

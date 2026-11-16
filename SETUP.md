@@ -10,6 +10,50 @@ Admin > Users > Create user: enter name, email, block and a temporary password. 
 At first login the user is forced to choose their own password (flag stored in server-only app_metadata).
 Forgotten password: an admin can reset it in the Supabase dashboard (Authentication > Users); not self-service without email.
 
+## Mobile admin login API
+`POST /mobile-app/login/admin-login` accepts an admin's email and password:
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "your-password"
+}
+```
+
+On success it returns the session tokens and admin profile, including `must_change_password`. Non-admin and inactive accounts are rejected.
+
+## Mobile correspondent management API
+All endpoints require an active admin's Supabase access token in `Authorization: Bearer <access_token>`.
+
+- `GET /mobile-app/admin/correspondents` returns all correspondent accounts, including each account's `is_active` status and block/district.
+- `GET /mobile-app/admin/correspondents/call-stats` returns total call counts for each correspondent and overall, including all-time, the last 7 calendar days (today and the previous 6 days), yesterday, and today. Calendar periods use Asia/Kolkata.
+- `PATCH /mobile-app/admin/correspondents` accepts a JSON body with `id` and one or more of `full_name`, `block_id`, or `is_active`. Block changes require an active block and update its district at the same time.
+- `DELETE /mobile-app/admin/correspondents?id=<uuid>` permanently deletes an account when no records refer to it. It returns `409` if linked records prevent deletion; deactivate the account instead to preserve history.
+- `POST /mobile-app/admin/create-correspondents` creates a correspondent from JSON fields `full_name`, `email`, `password`, and `block_id`; optional `is_active` defaults to `true`. New users must change their password at first login.
+
+## Mobile call logging API
+`POST /mobile-app/correspondant/call-logs` records a call for any active student. Any signed-in account with an active profile can use it, including admins and correspondents from other blocks. Send the Supabase access token as `Authorization: Bearer <access_token>` and a JSON body:
+
+```json
+{
+  "student_id": "student-uuid",
+  "request_id": "client-generated-uuid",
+  "call_status": "connected",
+  "interest_status": "interested",
+  "exam_applications": ["jnv"],
+  "admit_card_downloaded": true,
+  "interested_oav": null,
+  "previous_mock_test_attended": false,
+  "next_mock_test_ready": true,
+  "mock_test_status": "interested",
+  "notes": "Asked about the next mock test.",
+  "follow_up_required": true,
+  "follow_up_at": "2026-12-01T10:30:00+05:30"
+}
+```
+
+`student_id`, `request_id`, `call_status`, and `interest_status` are required. `call_status` accepts `connected`, `not_connected`, `busy`, `switched_off`, `invalid_number`, `disconnected`, or `call_back_requested`; `interest_status` accepts `unknown`, `interested`, `not_interested`, `maybe_later`, or `registered`. Applications are `jnv`, `oav`, or `none`; mock-test status is `interested`, `not_interested`, `already_attended`, or `not_attended_yet`. The optional application, question, notes, and follow-up fields follow the web call form's rules; booleans can be `true`, `false`, or `null`. A requested follow-up must have a future ISO 8601 timestamp. Generate a new `request_id` for each call and reuse it only when retrying that same request. New calls return `201` with `{ "call_log": { "id": "...", "created_at": "..." }, "duplicate": false }`; a recognized retry returns `200` with the existing call-log ID and `"duplicate": true`. Callers can read their own call logs; admins and correspondents can also read logs under the existing admin and same-block rules.
+
 Not in this build (Part 2): reports, charts, settings, user detail page.
 
 ## Part 2 additions

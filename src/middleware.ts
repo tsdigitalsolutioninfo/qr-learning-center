@@ -4,8 +4,15 @@ import { NextResponse, type NextRequest } from 'next/server';
 const PUBLIC = ['/login', '/unauthorized'];
 const PUBLIC_EXACT = new Set([
   '/call-status/ai-agent/jnv',
+  '/mobile-app/admin/dashboard',
+  '/mobile-app/admin/create-correspondents',
+  '/mobile-app/admin/correspondents',
+  '/mobile-app/admin/correspondents/call-stats',
+  '/mobile-app/login/admin-login',
   '/mobile-app/login/correspondant-login',
   '/mobile-app/correspondant/dashboard',
+  '/mobile-app/correspondant/students',
+  '/mobile-app/correspondant/call-logs',
 ]);
 const PUBLIC_PREFIXES = ['/call-status/ai-agent/jnv/'];
 const PUBLIC_PWA_ASSETS = new Set(['/manifest.webmanifest', '/offline.html', '/sw.js']);

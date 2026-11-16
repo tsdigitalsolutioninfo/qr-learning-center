@@ -26,6 +26,7 @@ On success it returns the session tokens and admin profile, including `must_chan
 All endpoints require an active admin's Supabase access token in `Authorization: Bearer <access_token>`.
 
 - `GET /mobile-app/admin/correspondents` returns all correspondent accounts, including each account's `is_active` status and block/district.
+- `GET /mobile-app/admin/correspondents/call-stats` returns total call counts for each correspondent and overall, including all-time, the last 7 calendar days (today and the previous 6 days), yesterday, and today. Calendar periods use Asia/Kolkata.
 - `PATCH /mobile-app/admin/correspondents` accepts a JSON body with `id` and one or more of `full_name`, `block_id`, or `is_active`. Block changes require an active block and update its district at the same time.
 - `DELETE /mobile-app/admin/correspondents?id=<uuid>` permanently deletes an account when no records refer to it. It returns `409` if linked records prevent deletion; deactivate the account instead to preserve history.
 - `POST /mobile-app/admin/create-correspondents` creates a correspondent from JSON fields `full_name`, `email`, `password`, and `block_id`; optional `is_active` defaults to `true`. New users must change their password at first login.

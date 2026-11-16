@@ -7,6 +7,7 @@ const PUBLIC_EXACT = new Set([
   '/mobile-app/admin/dashboard',
   '/mobile-app/admin/create-correspondents',
   '/mobile-app/admin/correspondents',
+  '/mobile-app/admin/correspondents/call-stats',
   '/mobile-app/login/admin-login',
   '/mobile-app/login/correspondant-login',
   '/mobile-app/correspondant/dashboard',

@@ -10,6 +10,18 @@ Admin > Users > Create user: enter name, email, block and a temporary password. 
 At first login the user is forced to choose their own password (flag stored in server-only app_metadata).
 Forgotten password: an admin can reset it in the Supabase dashboard (Authentication > Users); not self-service without email.
 
+## Mobile admin login API
+`POST /mobile-app/login/admin-login` accepts an admin's email and password:
+
+```json
+{
+  "email": "admin@example.com",
+  "password": "your-password"
+}
+```
+
+On success it returns the session tokens and admin profile, including `must_change_password`. Non-admin and inactive accounts are rejected.
+
 ## Mobile call logging API
 `POST /mobile-app/correspondant/call-logs` records a call for any active student. Any signed-in account with an active profile can use it, including admins and correspondents from other blocks. Send the Supabase access token as `Authorization: Bearer <access_token>` and a JSON body:
 

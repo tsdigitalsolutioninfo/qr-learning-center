@@ -73,8 +73,8 @@ export async function POST(request: NextRequest) {
   if (profileError) {
     return json({ error: 'Unable to load account profile.' }, 500);
   }
-  if (!profile || !profile.is_active) {
-    return json({ error: 'Account is not active.' }, 403);
+  if (!profile || !profile.is_active || !['admin', 'block_correspondence'].includes(profile.role)) {
+    return json({ error: 'Account is not an active admin or correspondent.' }, 403);
   }
 
   const call = parsed.data;

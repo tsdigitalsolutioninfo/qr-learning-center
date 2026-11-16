@@ -43,10 +43,10 @@ export async function GET(request: NextRequest) {
     .maybeSingle();
 
   if (profileError) {
-    return json({ error: 'Unable to load correspondent profile.' }, 500);
+    return json({ error: 'Unable to load account profile.' }, 500);
   }
-  if (!profile || profile.role !== 'block_correspondence' || !profile.is_active) {
-    return json({ error: 'Account is not an active correspondent.' }, 403);
+  if (!profile || !['admin', 'block_correspondence'].includes(profile.role) || !profile.is_active) {
+    return json({ error: 'Account is not an active admin or correspondent.' }, 403);
   }
 
   const parsed = filtersSchema.safeParse({

@@ -4,6 +4,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 const PUBLIC = ['/login', '/unauthorized'];
 const PUBLIC_EXACT = new Set([
   '/call-status/ai-agent/jnv',
+  '/mobile-app/admin/dashboard',
+  '/mobile-app/login/admin-login',
   '/mobile-app/login/correspondant-login',
   '/mobile-app/correspondant/dashboard',
   '/mobile-app/correspondant/students',

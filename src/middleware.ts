@@ -2,7 +2,11 @@ import { createServerClient, type SetAllCookies } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 const PUBLIC = ['/login', '/unauthorized'];
-const PUBLIC_EXACT = new Set(['/call-status/ai-agent/jnv']);
+const PUBLIC_EXACT = new Set([
+  '/call-status/ai-agent/jnv',
+  '/mobile-app/login/correspondant-login',
+  '/mobile-app/correspondant/dashboard',
+]);
 const PUBLIC_PREFIXES = ['/call-status/ai-agent/jnv/'];
 const PUBLIC_PWA_ASSETS = new Set(['/manifest.webmanifest', '/offline.html', '/sw.js']);
 
